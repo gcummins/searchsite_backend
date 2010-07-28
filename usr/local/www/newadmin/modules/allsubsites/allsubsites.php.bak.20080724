@@ -1,0 +1,96 @@
+<?php
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+define('ADMIN_DB_NAME', 'dh_newadmin');
+define('SUBSITES_TABLE_NAME', 'subsites');
+
+$task = getTask();
+
+switch ($task)
+{
+	default:
+		showTable();
+		break;
+}
+
+function showTable()
+{
+	global $adminLink;
+	
+	// Set the orderby parameter
+	if (isset($_REQUEST['paging_orderby']) && !empty($_REQUEST['paging_orderby']))
+	{
+		switch ($_REQUEST['paging_orderby'])
+		{
+			case "companyd":
+				$orderbyString = "ORDER BY company DESC";
+				break;
+			case "company";
+			case "companya":
+			default:
+				$orderbyString = "ORDER BY company ASC";
+				break;
+		}
+	}
+	else
+	{
+		$orderbyString = "ORDER BY company ASC";
+	}
+	
+	// Get a list of subsites from the database
+	$query = "SELECT id, name, url, db_name FROM " . ADMIN_DB_NAME . "." . SUBSITES_TABLE_NAME . " ORDER BY id;";
+	$result = mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+	
+	
+	
+	?>
+	<table class="contentTable">
+	<tr class="table_titlebar">
+		<td colspan=4>Sub-Sites</td>
+	</tr>
+	<tr>
+		<th>ID</th>
+		<th>Name</th>
+		<th>URL</th>
+		<th>DB_NAME</th>
+	</tr>
+	<?php
+	if (!mysql_num_rows($result))
+	{
+		// No subsite records were found
+		?><tr>
+			<td colspan=4>No sub-sites were found.</td>
+			</tr>
+		<?php
+	}
+	else
+	{
+		// Display a summary of each subsite
+		while ($row = mysql_fetch_object($result))
+		{
+			?><tr>
+					<td><?php echo $row->id; ?></td>
+					<td><a href="#"><?php echo $row->name; ?></a></td>
+					<td><a href="<?php
+					
+					// Make sure that we have a usuable URL to display
+					if (substr($row->url, 0, 7) != "http://")
+					{
+						echo "http://";
+					}
+					echo $row->url;
+					?>"><?php echo $row->url; ?></a></td>
+					<td><?php echo $row->db_name; ?></td>
+				</tr>
+			<?php
+		}
+	}
+	?>
+	</table>
+	<?php
+}

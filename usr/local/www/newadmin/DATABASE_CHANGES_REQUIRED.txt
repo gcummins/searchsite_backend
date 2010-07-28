@@ -1,0 +1,6 @@
+DATABASE:	dealhunting
+TABLE:		category
+FIELD:		orderby
+Change type of this field from 'char(2)' to 'int'
+
+

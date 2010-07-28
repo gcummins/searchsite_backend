@@ -1,0 +1,83 @@
+/*
+#pagecontent table.contentTable tr:hover td
+{
+	background-color: #ece9d8;
+	cursor: default;
+}
+*/
+#pagecontent table.contentTable td
+{
+	padding: 0;
+	margin: 0;
+	border: none;
+	width: 250px;
+	background-color: #ece9d8;
+}
+#pagecontent table.contentTable tr.table_titlebar:hover td
+{
+	cursor: default;
+	background-color: #225dc6;
+}
+#pagecontent table.contentTable td div
+{
+	border: 1px solid #000;
+	background-color: #aca899;
+	background-repeat: no-repeat;
+	background-position: left 2em;
+	margin-bottom: 10px;
+	cursor: pointer;
+}
+#pagecontent table.contentTable td div span.div_titlebar
+{
+	display: block;
+	width: 100%;
+	color: #fff;
+	background-color: #225dc6;
+	font-size: 110%;
+	font-weight: bold;
+	border-bottom: 1px solid #000;
+	line-height: 1.5em;
+	
+}
+/*
+#pagecontent table.contentTable td div span.div_titlebar:hover
+{
+	background-color: #225dc6;
+}
+*/
+#pagecontent table.contentTable td div p
+{
+	margin-left: 52px;
+}
+#pagecontent table.contentTable form
+{
+	line-height: 2em;
+}
+#pagecontent table.contentTable form select.textbox
+{
+	border: 1px solid #7f9db9;
+}
+#pagecontent table.contentTable form input.textbox
+{
+	border: 1px solid #7f9db9;
+	width: 16em;
+	/*text-align: center;*/
+}
+#treeDiv
+{
+	height: 100%;
+	width: 300px;
+	float: left;
+}
+#logEntryDiv
+{
+	height: 100%;
+	margin: 30px 0 0 315px;
+}
+#logEntryDiv label
+{
+	font-weight: bold;
+	display: block;
+	width: 8em;
+	float: left;
+}

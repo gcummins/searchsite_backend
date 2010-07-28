@@ -1,0 +1,619 @@
+<?php
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+$task = getTask();
+
+switch ($task)
+{
+	case 'editSubmit':
+		editSubmit();
+		break;
+	case 'addSubmit':
+		addSubmit();
+		break;
+	case 'deleteSubmit':
+		deleteSubmit();
+		break;
+	case 'companylinks':
+		companyLinks();
+		break;
+	default:
+		showTable();
+		break;
+}
+
+function companyLinks()
+{
+	global $dealhuntingDatabase, $module;
+	
+	if (!isPermitted('edit', $module))
+	{
+		returnError(301, LANGUAGE_ERROR_OPERATION_NOT_PERMITTED, false);
+		returnToMainPage();
+		return 0;
+	}
+	
+	// Make sure we received a category ID
+	if (!isset($_POST['categoryid']) || !intval($_POST['categoryid']))
+	{
+		returnError(201, 'A Category ID must be provided.', false);
+		return 0;
+	}
+	else
+	{
+		$id = intval($_POST['categoryid']);
+	}
+	
+	// Create the query to remove all existing entries from the database for this company
+	$dealhuntingDatabase->query("DELETE FROM `" . DEALHUNTING_STORECATEGORIES_TABLE . "` WHERE `cat`= $id;");
+		
+	// Create the query to insert the new links into the database
+	if (array_key_exists('sel_linked_companies', $_POST) && count($_POST['sel_linked_companies']))
+	{
+		$query = "INSERT INTO `" . DEALHUNTING_STORECATEGORIES_TABLE
+				. "` (`store`, `cat`) VALUES ";
+	
+		foreach ($_POST['sel_linked_companies'] as $companyId)
+		{
+			$query .= "($companyId, $id), ";
+		}
+		
+		$query = substr($query, 0, -2) . ";";
+		$dealhuntingDatabase->query($query);
+		
+		returnMessage(1001, sprintf(LANGUAGE_MODIFY_OBJECT_ID, 'linked companies for category', $id), false);
+	}
+	
+	returnToMainPage();
+}
+
+function deleteSubmit()
+{
+	global $dealhuntingDatabase, $module;
+
+	if (!isPermitted('delete', $module))
+	{
+		returnError(301, LANGUAGE_ERROR_OPERATION_NOT_PERMITTED, false);
+		returnToMainPage(getStartPage());
+		return 0;
+	}
+	
+	if (isset($_REQUEST['categoryid']) && is_numeric($_REQUEST['categoryid']))
+	{
+		$categoryID = (int)$_REQUEST['categoryid'];
+		
+		$query = "DELETE FROM " . DEALHUNTING_CATEGORIES_TABLE . " WHERE id=$categoryID LIMIT 1;";
+		$dealhuntingDatabase->query($query, false);
+		
+		if (true == $dealhuntingDatabase->error)
+		{
+			returnError(902, $query, true, $dealhuntingDatabase);
+			returnToMainPage(getStartPage());
+		}
+		else
+		{
+			returnMessage(1101, sprintf(LANGUAGE_DELETE_OBJECT_ID, 'category', $categoryID), false);
+		}
+	}
+	else
+	{
+		returnError(200, "Invalid category ID was supplied", false);
+		
+	}
+
+	returnToMainPage(getStartPage());
+}
+
+function addSubmit()
+{
+	global $dealhuntingDatabase, $module;
+
+	if (!isPermitted('create', $module))
+	{
+		returnError(301, LANGUAGE_ERROR_OPERATION_NOT_PERMITTED, false);
+		returnToMainPage();
+		return 0;
+	}	
+	
+	// Gather the required fields
+	if (isset($_REQUEST['edit_category']) && !empty($_REQUEST['edit_category']))
+	{
+		$category = $dealhuntingDatabase->escape_string($_REQUEST['edit_category']);
+	}
+	else
+	{
+		returnError(201, 'A category name must be provided.', false);
+		return false;
+	}
+	
+	// Make sure the category list is properly ordered:
+	checkCategoryOrdering();
+	
+	if (isset($_REQUEST['edit_order']))
+	{
+		$orderby = (int)$_REQUEST['edit_order'];
+		
+		// Check the orderby value to determine where this should be inserted.
+		if ($orderby == 'first')
+		{
+			$orderby = 0;
+		}
+		else
+		{
+			// An orderby was provided that places this item after other items in the list
+			// We will need to adjust the entire list to place this in an appropriate place.
+	
+			// Increment the orderby value because this item should be placed *after* the selected
+			// orderby value. See the SELECT in the edit_div for more information
+			$orderby++;	
+	
+			// Get a list of all existing categories and their orderby values
+			$dealhuntingDatabase->query("SELECT `id`, `cat`, `orderby` FROM `" . DEALHUNTING_CATEGORIES_TABLE . "` ORDER BY `orderby`;");
+			
+			$arrNewOrderbyList = array();
+			$maxOrderby = 0;
+			
+			foreach ($dealhuntingDatabase->objects() as $row)
+			{
+				if ($orderby > $row->orderby)
+				{
+					$arrNewOrderbyList[$row->id] = $row->orderby;
+				}
+				else
+				{
+					$arrNewOrderbyList[$row->id] = $row->orderby + 1;
+				}
+				
+				// This will be used later to determine if we need to update every record in the table.
+				if ($row->orderby > $maxOrderby)
+				{
+					$maxOrderby = $row->orderby;
+				}
+			}
+	
+			// Determine if we really need to spend the processing power to update every record in the table with
+			// a new orderby. If this new category was added as the last in the list, we don't need to update the others.
+			if ($orderby <= $maxOrderby)
+			{
+				// Cycle through and update each record
+				foreach ($arrNewOrderbyList as $existingCategory=>$newOrderbyValue)
+				{
+					if ($newOrderbyValue > $orderby)
+					{
+						$dealhuntingDatabase->query("UPDATE `" . DEALHUNTING_CATEGORIES_TABLE . "` SET `orderby`=$newOrderbyValue WHERE id=$existingCategory LIMIT 1; ");
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		// Insert at the end of the list
+		$dealhuntingDatabase->query("SELECT MAX(`orderby`) as maxorderby FROM " . DEALHUNTING_CATEGORIES_TABLE . ";");
+		
+		$row = $dealhuntingDatabase->firstObject();
+		$orderby = $row->maxorderby + 1;		
+	}
+
+	if (isset($_REQUEST['edit_expiration_date']))
+	{
+		$benddate = $_REQUEST['edit_expiration_date'];
+
+		if ($benddate == false)
+		{
+			$benddate = null;
+		}
+	}
+	else
+	{
+		$benddate = null;
+	}
+	
+	if (isset($_REQUEST['banner_id']) && (int)$_REQUEST['banner_id'] > 0)
+	{
+		$bannerId = (int)$_REQUEST['banner_id'];
+	}
+	else
+	{
+		$bannerId = 'null';
+	}
+	
+	$query = "INSERT INTO `" . DEALHUNTING_CATEGORIES_TABLE . "` (`cat`, `benddate`, `orderby`, `banner_id`) "
+			. "VALUES ("
+			. "'$category',"
+			. "'$benddate',"
+			. "$orderby,"
+			. "$bannerId"
+			. ");";
+	
+	$dealhuntingDatabase->query($query);
+	
+	returnMessage(1002, sprintf(LANGUAGE_CREATE_OBJECT_NAME, 'category', $category), false);
+	
+	// If we inserted this category at the beginning of the orderby list, we need to run checkCategoryOrdering() again
+	// to refactor the ordering
+	if ($orderby == 0)
+	{
+		checkCategoryOrdering();
+	}	
+	
+	returnToMainPage();
+	exit();
+	
+}
+
+function editSubmit()
+{ 
+	// In Progress: to be completed
+	
+	global $dealhuntingDatabase, $module;
+
+	if (!isPermitted('edit', $module))
+	{
+		returnError(301, LANGUAGE_ERROR_OPERATION_NOT_PERMITTED, false);
+		returnToMainPage();
+		return 0;
+	}
+	
+	// Gather the required fields
+	if (isset($_REQUEST['categoryid']) && is_numeric($_REQUEST['categoryid']))
+	{
+		$categoryID = (int)$_REQUEST['categoryid'];
+	}
+	else
+	{
+		returnError(201, 'A category ID must be provided.', false);
+	}	
+	
+	if (isset($_REQUEST['edit_category']) && !empty($_REQUEST['edit_category']))
+	{
+		$category = $dealhuntingDatabase->escape_string($_REQUEST['edit_category']);
+	}
+	else
+	{
+		returnError(201, 'A category name must be provided.', false);
+		return;
+	}
+	
+	// Make sure the category list is properly ordered:
+	checkCategoryOrdering();
+	
+	if (isset($_REQUEST['edit_order']))
+	{
+		$orderby = (int)$_REQUEST['edit_order'];
+	}
+	else
+	{
+		returnError(201, 'An orderby value must be provided.', false);		
+	}
+	
+	if (isset($_REQUEST['edit_expiration_date']))
+	{
+		$benddate = $_REQUEST['edit_expiration_date'];
+
+		if ($benddate == false)
+		{
+			$benddate = null;
+		}
+	}
+	else
+	{
+		$benddate = null;
+	}
+
+	$categorybanner = null;
+	if (isset($_REQUEST['edit_banner']))
+	{
+		$categorybanner = $dealhuntingDatabase->escape_string(urldecode($_REQUEST['edit_banner']));
+	}
+
+	if (isset($_REQUEST['banner_id']))
+	{
+		$bannerId = (int)$_REQUEST['banner_id'];
+	}
+	else
+	{
+		$bannerId = null;
+	}
+	
+	if ($orderby == "first")
+	{
+		$orderby = 0;
+	}
+	else
+	{
+		// Increment the orderby value because of the way the
+		// SELECT works in the edit_div.
+		$orderby++;
+	}
+	
+	// Determine if the current $orderby value matches the orderby value
+	// for this record in the table
+	$dealhuntingDatabase->query("SELECT `orderby` FROM `" . DEALHUNTING_CATEGORIES_TABLE . "` WHERE id=$categoryID LIMIT 1;");
+	
+	if ($dealhuntingDatabase->rowCount() == 0)
+	{
+		returnError(301, 'No category was found in the database matching the category ID that was provided.', false);
+		
+		returnToMainPage();
+	}
+	
+	$row = $dealhuntingDatabase->firstObject();
+	
+	if ($orderby != $row->orderby)
+	{
+		// The orderby values match do not match, so we do need to make change to the entire list.	
+	
+		// Get a list of all existing categories and their orderby values
+		$dealhuntingDatabase->query("SELECT `id`, `cat`, `orderby` FROM `" . DEALHUNTING_CATEGORIES_TABLE . "` ORDER BY `orderby`;");
+		
+		$arrNewOrderbyList = array();
+		$maxOrderby = 0;
+		foreach ($dealhuntingDatabase->objects() as $row)
+		{
+			if ($orderby > $row->orderby)
+			{
+				$arrNewOrderbyList[$row->id] = $row->orderby;
+			}
+			else
+			{
+				$arrNewOrderbyList[$row->id] = $row->orderby + 1;
+			}
+			
+			// This will be used later to determine if we need to update every record in the table.
+			if ($row->orderby > $maxOrderby)
+			{
+				$maxOrderby = $row->orderby;
+			}
+		}
+
+		// Determine if we really need to spend the processing power to update every record in the table with
+		// a new orderby. If this new category was added as the last in the list, we don't need to update the others.
+		if ($orderby <= $maxOrderby)
+		{
+			// Cycle through and update each record
+			foreach ($arrNewOrderbyList as $existingCategory=>$newOrderbyValue)
+			{
+				if ($newOrderbyValue > $orderby)
+				{
+					$dealhuntingDatabase->query("UPDATE " . DEALHUNTING_CATEGORIES_TABLE . " SET `orderby`=$newOrderbyValue WHERE id=$existingCategory LIMIT 1; ");
+				}
+			}
+		}
+	}
+
+	$query = "UPDATE " . DEALHUNTING_CATEGORIES_TABLE . " SET"
+			. " `cat` = '$category',"
+			. " `benddate` = '$benddate',"
+			. " `orderby` = '$orderby',"
+			. " `banner_id` = $bannerId"
+			. " WHERE `id`=$categoryID LIMIT 1;";
+	$dealhuntingDatabase->query($query);
+	
+	returnMessage(1001, sprintf(LANGUAGE_MODIFY_OBJECT_NAME, 'category', $category), false);
+	
+	// If we inserted this category at the beginning of the orderby list, we need to run checkCategoryOrdering() again
+	// to refactor the ordering
+	if ($orderby == 0)
+	{
+		checkCategoryOrdering();
+	}	
+	
+	returnToMainPage();
+	return;
+}
+
+function checkCategoryOrdering()
+{
+	// This function will check the Category 'ordering' values to make sure they are consecutive and start with '1'
+	global $dealhuntingDatabase;
+	
+	$dealhuntingDatabase->query("SELECT `id`, `orderby` FROM `" . DEALHUNTING_CATEGORIES_TABLE . "` ORDER BY `orderby` ASC;");
+	
+	$arrIdsAndOrdering = array();
+	foreach ($dealhuntingDatabase->objects() as $row)
+	{
+		$arrIdsAndOrdering[$row->id] = $row->orderby;
+	}	
+
+	// The next few lines check the top and bottom of the array. The first value should be equal to one,
+	// and the last value should be equal to the number of elements in the array.
+	
+	// We should consider checking each item in the array, because there is a chance that the following
+	// scenario would exist:
+	
+	// array (1, 2, 2, 4)
+	
+	// This array would pass the upper- and lower-bound checks, but still is not ordered correctly.
+	// Is it worth using the processing time to check this every time this script is run?
+	
+
+	// The value of the first element of the array should be '1'
+	if (1 != min($arrIdsAndOrdering))
+	{
+		refactorCategoryOrdering($arrIdsAndOrdering);
+	}
+	elseif (max($arrIdsAndOrdering) != count($arrIdsAndOrdering))
+	{
+		refactorCategoryOrdering($arrIdsAndOrdering);
+	}
+	// else, no need to refactor
+}
+
+function refactorCategoryOrdering($arrIdsAndOrdering)
+{
+	global $dealhuntingDatabase;
+	
+	// Create the new ordering values, and update the database.
+	$i=1;
+	foreach (array_keys($arrIdsAndOrdering) as $key)
+	{
+		$arrIdsAndOrdering[$key] = $i;
+		$dealhuntingDatabase->query("UPDATE `" . DEALHUNTING_CATEGORIES_TABLE . "` SET `orderby` = $i WHERE `id`=$key LIMIT 1;");
+		$i++;
+	}
+}
+
+function showTable()
+{
+	global $dealhuntingDatabase, $module, $moduleName;
+
+	returnMessage(1000, LANGUAGE_VIEWED_MAIN_PAGE, false);
+	
+	checkCategoryOrdering();
+	
+	// Create the legend
+	include "modules/includes/legend.class.php";
+	$legend = new Legend(array(
+		array('good', 'Good'),
+		array('expired', 'Banner Expired')
+	));
+	echo $legend->create();
+	
+	if (isset($_REQUEST['paging_orderby']) && !empty($_REQUEST['paging_orderby']))
+	{
+		switch ($_REQUEST['paging_orderby'])
+		{
+			default:
+				$orderbyString = "ORDER BY orderby ASC";
+				break;
+		}
+	}
+	else
+	{
+		$orderbyString = "ORDER BY orderby ASC";
+	}
+	
+	// Get a count of all available categories
+	$dealhuntingDatabase->query("SELECT COUNT(*) as `count` FROM `" . DEALHUNTING_CATEGORIES_TABLE . "`;");
+	$rowCount = $dealhuntingDatabase->firstField();
+	
+	// Include the pagination class
+	include "includes/pagination.class.php";
+	
+	$paginator = new Pagination($module, $rowCount);
+	
+	$query = "SELECT"
+		. " `id`, `cat`, `banner`, `orderby`, `benddate`"
+		. " FROM `" . DEALHUNTING_CATEGORIES_TABLE
+		. "` $orderbyString " . $paginator->getLimitString();
+		
+	$dealhuntingDatabase->query($query);
+	
+	// Include the table-creation class
+	include_once "includes/pageContentTable.class.php";
+	
+	$arrDataRows = array();
+	foreach ($dealhuntingDatabase->objects() as $row)
+	{
+		// Create action links only if allowed for this user
+		$actionButtons = null;
+		if (isPermitted('edit', $module))
+		{
+			$actionButtons .= "<a href=\"#\" onclick=\"showEditDiv(" . $row->id . ", '" . ADMINPANEL_WEB_PATH . "', '$moduleName', '" . $_SERVER['PHP_SELF'] . "', $module);\"><img src=\"" .  ADMINPANEL_WEB_PATH . "/images/edit.png\" alt=\"Edit\" /></a>";
+		}
+		if (isPermitted('delete', $module))
+		{
+			$actionButtons .= "<a href=\"#\" onclick=\"confirmCategoryDelete('" . $row->cat . "', " . $row->id . ", '" . ADMINPANEL_WEB_PATH . "', '$module');\"><img src=\"" . ADMINPANEL_WEB_PATH. "/images/delete.png\" alt=\"Delete\" /></a>";
+		}
+		if (!empty($row->benddate) && strtotime("Today") > strtotime($row->benddate))
+		{
+			$rowModifier = "class=\"legend_expired\"";
+		}
+		else
+		{
+			$rowModifier = "class=\"legend_good\"";
+		}
+		if (!empty($actionButtons))
+		{
+			$arrListOfColumns = array('Action', 'Category', 'Companies');
+			$arrDataRows[] = array($rowModifier, array(
+				array("class=\"action_buttons\"", $actionButtons),
+				array('', htmlspecialchars($row->cat)),
+				array('', "<a href=\"#\" onclick=\"showLinkedCompaniesDiv(" . $row->id . ", '" . ADMINPANEL_WEB_PATH . "', '" . $moduleName . "'); return false\">Companies...</a>")
+			));
+		}
+		else
+		{
+			
+			$arrListOfColumns = array('Category', 'Companies');
+			$arrDataRows[] = array($rowModifier, array(
+				array('', htmlspecialchars($row->cat)),
+				array('', "<a href=\"#\" onclick=\"showLinkedCompaniesDiv(" . $row->id . ", '" . ADMINPANEL_WEB_PATH . "', '" . $moduleName . "'); return false\">Companies...</a>")
+			));
+		}
+	}
+
+	// Set the table action
+	if (isPermitted('create', $module))
+	{
+		$action = "showNewDiv('" . ADMINPANEL_WEB_PATH . "', '" . $_SERVER['PHP_SELF'] . "', $module, '$moduleName');";
+	}
+	else
+	{ 
+		$action = null;
+	}
+	
+	// Creat an array to hold the "addendum" to the table
+	$arrAddendum = array(
+		$paginator->generateLinkBar()
+	);
+	
+	// Create the table
+	$theTable = new pageContentTable('Categories Administration', $arrListOfColumns, 'Create Category', $action, $arrDataRows, $arrAddendum);
+	
+	if ($theTable->error())
+	{
+		returnError(301, $theTable->error(), true);
+	}
+	else
+	{
+		echo $theTable->createTable();
+	}
+	?>
+	<!-- </table> -->
+	<div id="div_linked_companies_container">
+		<div id="div_linked_companies_inner_container">
+			<span class="edit_div_title">Edit Companies In This Category</span>
+			<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+				<table>
+					<tr>
+						<td style="padding-left: 12px" width="45%">
+							<label for="sel_linked_companies">Linked Companies</label>
+							<select name="sel_linked_companies[]" id="sel_linked_companies" multiple size="10"></select>
+						</td>
+						<td width="10%" align="center">
+							<input type="button" value="&lt;&lt;" onclick="showAJAXWaitControl('Linking Companies'); linkSelected(); hideAJAXWaitControl(); "<?php if (!isPermitted('edit', $module)) { echo " disabled"; } ?> /><br />
+							<input type="button" value="&gt;&gt;" onclick="unlinkSelected();"<?php if (!isPermitted('edit', $module)) { echo " disabled"; } ?> /><br />
+						</td>
+						<td style="padding-right: 12px" width="45%">
+							<label for="sel_unlinked_companies">Unlinked Companies</label><br />
+							<select name="sel_unlinked_companies[]" id="sel_unlinked_companies" multiple size="10"></select>
+						</td>
+					</tr>
+				</table>
+				<input type="hidden" name="module" value="<?php echo $module; ?>" />
+				<input type="hidden" name="task" value="companylinks" />
+				<input type="hidden" name="categoryid"  id="categoryid" value="" />
+				<div class="form_button_div">
+					<?php
+					if (isPermitted('edit', $module))
+					{
+						?>
+					<input type="submit" value="Submit" class="inputbutton" onclick="return validateForm_linking();" />
+						<?php
+					} ?>
+					<input type="button" value="Cancel" class="inputbutton" onclick="hideLinkedCompaniesDiv();" />
+				</div>
+			</form>
+		</div>
+		<div class="translucentbackground"></div>
+	</div>
+	<?php
+}
+?>

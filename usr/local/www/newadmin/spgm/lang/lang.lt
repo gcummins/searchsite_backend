@@ -1,0 +1,42 @@
+<?php
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'galerija sukurta >SPGM_LINK<';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = 'Puslapis >CURRENT_PAGE< i¹ >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'filtras';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'naujos';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'visos';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Slideshow';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = 'nuotrauka >CURRENT_PIC< i¹ >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'nuotrauk.';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'nuotrauk.';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'nauja nuotrauk.';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = 'naujos nuotrauk.';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'nauja galerija';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Pagrindine galerija';
+
+?>

@@ -1,0 +1,5 @@
+#edit_div table td.detail_cell label
+{
+	white-space: nowrap;
+	width: 260px;
+}

@@ -1,0 +1,94 @@
+<?php
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+// Application Database connection information
+/*define('DB_SERVER', 'localhost');
+define('DB_NAME', 'dh_newadmin');
+define('DB_USERNAME', 'dealhuntingAdmin');
+define('DB_PASSWORD', 'dh*K98_3#.&LRoBb');*/
+
+// Filesystem paths.
+define('MODULE_DIRECTORY', 'modules'); // A path relative to the location of the ADMINPANEL_WEB_PATH above
+
+// Table Names
+define('SUBSITES_TABLE_NAME', 'subsites');
+define('SUBSITES_KEYWORDS_TABLE_NAME', 'subsites_keywords');
+
+// Control the theme
+define('GLOBAL_THEME', '');
+define('MENU_TYPE', 'css'); // Options are 'css' and 'outlook'
+
+// Menu Ordering
+define('MENU_MODULES_ORDER_BY', 'db'); // Possible values are 'db', and 'alpha'
+
+// Global layout controls
+define('GLOBAL_MAX_TABLE_ROWS', 10);
+define('GLOBAL_MAX_PAGINATION_LINKS', 10); // Should be an even number: 10,12,14, etc.
+define('GLOBAL_URL_LENGTH', 100);
+
+// Dealhunting
+define('DEALHUNTING_GALLERY_LOCATION', 'dhimages');
+define('DEALHUNTING_GALLERY_FILESYSTEM_PATH', '/usr/local/www/www.dealhunting.com/' . DEALHUNTING_GALLERY_LOCATION);
+define('DEALHUNTING_DATAFEEDS_DATABASE', 'datafeeds2');
+define('DEALHUNTING_SEARCHSITE_DATABASE', 'datafeeds2');
+
+// Dealhunting Database constants
+define('DEALHUNTING_BANNERS_TABLE', 'banners');
+define('DEALHUNTING_DB_NAME', 'dealhunting');
+define('DEALHUNTING_CATEGORIES_TABLE', 'category');
+define('DEALHUNTING_COMPANIES_TABLE', 'company');
+define('DEALHUNTING_COUPONS_TABLE', 'coupon');
+define('DEALHUNTING_REDIRECTION_TABLE', 'redir');
+define('DEALHUNTING_SEARCHTERMS_TABLE', 'srchlog');
+define('DEALHUNTING_STORECATEGORIES_TABLE', 'storecat');
+define('DEALHUNTING_TOPDEALS_TABLE', 'topdeals_new');
+define('DEALHUNTING_DAILYNOTES_TABLE', 'dailynotes');
+define('DEALHUNTING_DAILYDEALS_TABLE', 'deals');
+define('DEALHUNTING_FEED_TYPE_1', 'CJ');
+define('DEALHUNTING_FEED_TYPE_2', 'LinkShare');
+define('DEALHUNTING_FEED_TYPE_3', 'Performics');
+
+// Group IDs
+// Notice that you will need to update the 'group' and 'users' table if you
+// modify these values
+define('GROUPS_ADMINISTRATOR_ID', 1);
+define('GROUPS_USER_ID', 2);
+
+// On-screen messages
+define('CREATE_CSV_FILE', 'Create as CSV file');
+
+// Error messages
+define('ERROR_OPERATION_NOT_PERMITTED', 'This operation is not permitted.');
+
+// Notice Messages
+define('VIEWED_MAIN_PAGE', 'Viewed main page');
+define('DELETE_OBJECT_ID', "Deleted %s with ID '%s'");
+define('DELETE_OBJECT_NAME', "Deleted %s '%s'");
+define('MODIFY_OBJECT_ID', "Modified %s with ID '%s'");
+define('MODIFY_OBJECT_NAME', "Modified %s '%s'");
+define('CREATE_OBJECT_ID', "Created %s with ID '%s'");
+define('CREATE_OBJECT_NAME', "Created %s '%s'");
+
+// Audit Logs
+define('AUDITLOG_MAX_LOG_TAG_LENGTH', 25); // Maximum length of the log title in the log entry table
+
+// Images
+define('IMAGES_ACTION_EDIT', '/newadmin/images/edit.png');
+define('IMAGES_ACTION_DELETE', '/newadmin/images/delete.png');
+
+// Banners
+define('BANNER_DEFAULT_WIDTH', 468);
+define('BANNER_DEFAULT_HEIGHT', 60);
+
+// Datafeeds information
+define('DATAFEEDS_DATABASE_HOST', 'localhost');
+define('DATAFEEDS_DATABASE_USERNAME', 'root');
+define('DATAFEEDS_DATABASE_PASSWORD', '1yaaya5');
+define('DATAFEEDS_DATABASE_NAME', 'datafeeds2');
+
+?>

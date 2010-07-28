@@ -1,0 +1,45 @@
+<?php
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'Galerie générée par >SPGM_LINK<';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar'] = 'Page >CURRENT_PAGE< sur >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'filtre';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'nouvelles';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'toutes';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Diaporama';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = 'Image >CURRENT_PIC< sur >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'image';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'images';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'nouvelle image';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = 'nouvelles images';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'nouvelle galerie';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Galerie principale';
+
+# Title for EXIF data screen
+$spgm_cfg['locale']['exifHeading'] = 'Données EXIF pour';
+
+?>

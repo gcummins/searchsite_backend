@@ -1,0 +1,46 @@
+<?php
+
+# Use charset iso-2022-kr or better:
+# <meta http-equiv='Content-type' content='text/html; charset=euc-kr'>
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = '>SPGM_LINK< 으로 만든 갤러리.';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = '>NB_PAGES< 페이지 중 >CURRENT_PAGE< 페이지 ';
+
+# filter label
+$spgm_cfg['locale']['filter'] = ' 필터 ';
+
+# filter value for '새 사진들'
+$spgm_cfg['locale']['filterNew'] = '새사진';
+
+# filter value for '모든 사진들'
+$spgm_cfg['locale']['filterAll'] = '모두';
+
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Slideshow';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = '>NB_PICS<장 중 >CURRENT_PIC<째 장';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = '사진';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = '사진들';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = '새사진';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = '새사진들';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = '새 갤러리';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = '주 갤러리';
+
+?>

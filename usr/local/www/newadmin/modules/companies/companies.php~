@@ -1,0 +1,435 @@
+<?php
+
+define('ROW_LIMIT', 30);
+define('URL_LENGTH', 100);
+define('DESCRIPTION_LENGTH', 23);
+define('ROWS_PER_PAGE', 30);
+define('MAX_PAGINATION_LINKS', 10);
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+$task = false;
+if (isset($_REQUEST['task']) && !empty($_REQUEST['task']))
+{
+	$task = $_REQUEST['task'];
+}
+foreach ($_REQUEST as $key=>$value)
+{
+	echo "$key => $value<br />";
+}
+echo "Task :: $task.<br />";
+
+
+switch ($task)
+{
+	case 'saveEdit':
+		saveEdit();
+		break;
+	case 'saveNew':
+		saveNew();
+		break;
+	case 'deleteSubmit':
+		deleteSubmit();
+		break;
+	default:
+		showTable();
+		break;
+}
+
+function deleteSubmit()
+{
+	// In Progress :: to be completed
+	
+	global $dealhuntingLink;
+	
+	if (isset($_REQUEST['companyid']) && is_numeric($_REQUEST['companyid']))
+	{
+		$companyID = intval($_REQUEST['companyid']);
+		
+		$query = "DELETE FROM " . DEALHUNTING_COMPANIES_TABLE . " WHERE id=$companyID LIMIT 1;";
+		mysql_query($query, $dealhuntingLink) or returnError(902, $query, true, $dealhuntingLink);
+	}
+	else
+	{
+		returnError(200, "Invalid company ID was supplied", false);
+	}
+	
+	showTable();
+}
+
+function saveEdit()
+{
+	global $dealhuntingLink;
+	
+	// Collect all the field values and types
+	$arrFields = getFieldNames();
+	$arrFieldsTypes = getFieldTypes();
+	
+	if (isset($_REQUEST['edit_company_id']) && is_numeric($_REQUEST['edit_company_id']))
+	{
+		$companyID = intval($_REQUEST['edit_company_id']);
+	}
+	else
+	{
+		returnError(200, "Invalid company ID was supplied", false);
+	}
+	
+	$query = "UPDATE " . DEALHUNTING_COMPANIES_TABLE . " SET ";
+	
+	foreach ($arrFields as $formFieldName => $dbFieldName)
+	{
+		$query .= "`$dbFieldName`=";
+		switch ($arrFieldsTypes[$formFieldName])
+		{
+			case 'integer':
+				$query .= intval($_REQUEST[$formFieldName]);
+				break;
+			case 'datetime':
+				$query .= "'" . date('Y-m-d H:i:s', strtotime($_REQUEST[$formFieldName])) . "'";
+				break;
+			case 'bool':
+				if (intval($_REQUEST[$formFieldName]))
+				{
+					$query .= "1";
+				}
+				else
+				{
+					$query .= "0";
+				}
+				break;
+			case 'checkbox':
+				if ($_REQUEST[$formFieldName] == 'on')
+				{
+					$query .= "1";
+				}
+				else
+				{
+					$query .= "0";
+				}
+				break;
+			case 'string':
+			default:
+				$query .= "'" . addslashes($_REQUEST[$formFieldName]) . "'";
+				break;		
+		}
+		$query .= ", ";
+	}
+
+	// Strip the trailing comma from the string and continue the query
+	$query = substr($query, 0, -2) . " WHERE `id`=$companyID LIMIT 1";
+	
+	echo "$query<br />";
+	mysql_query($query, $dealhuntingLink) or returnError(902, true, $query, $dealhuntingLink);
+
+	showTable();
+}
+
+function saveNew()
+{
+	global $dealhuntingLink;
+
+	// Collect all the field values and types
+	$arrFields = getFieldNames();
+	$arrFieldsTypes = getFieldTypes();
+	
+	
+	$query = "INSERT INTO " . DEALHUNTING_COMPANIES_TABLE . " (";
+	$valuesString = " VALUES (";
+
+	foreach ($arrFields as $formFieldName => $dbFieldName)
+	{
+		$query .= "`$dbFieldName`, ";
+		switch ($arrFieldsTypes[$formFieldName])
+		{
+			case 'integer':
+				$valuesString .= intval($_REQUEST[$formFieldName]) . ", ";
+				break;
+			case 'datetime':
+				$valuesString .= "'" . date('Y-m-d H:i:s', strtotime($_REQUEST[$formFieldName])) . "', ";
+				break;
+			case 'bool':
+				if (intval($_REQUEST[$formFieldName]))
+				{
+					$valuesString .= "1, ";
+				}
+				else
+				{
+					$valuesString .= "0, ";
+				}
+				break;
+			case 'checkbox':
+				if ($_REQUEST[$formFieldName] == 'on')
+				{
+					$valuesString .= "1, ";
+				}
+				else
+				{
+					$valuesString .= "0, ";
+				}
+				break;
+			case 'string':
+			default:
+				$valuesString .= "'" . addslashes($_REQUEST[$formFieldName]) . "', ";
+				break;
+		}
+	}
+	
+	// Strip the trailing comma from the string and continue the query
+	$query = substr($query, 0, -2) . ")" . substr($valuesString, 0, -2) . ");";
+	mysql_query($query, $dealhuntingLink) or returnError(902, true, $query, $dealhuntingLink);
+
+	showTable();
+}
+
+function showTable()
+{
+	global $adminLink, $dealhuntingLink, $module, $moduleName;
+	
+	// Determine the starting page
+	if (isset($_REQUEST['spage']) && !empty($_REQUEST['spage']))
+	{
+		$startPage = intval($_REQUEST['spage']);
+	}
+	else
+	{
+		$startPage = 1;
+	}
+	
+	if (isset($_REQUEST['rpp']) && is_numeric($_REQUEST['rpp']) && $_REQUEST['rpp'])
+	{
+		$recordsPerPage = $_REQUEST['rpp'];
+	}
+	else
+	{
+		$recordsPerPage = ROWS_PER_PAGE;
+	}
+	
+	if (isset($_REQUEST['sortby']) && !empty($_REQUEST['sortby']))
+	{
+		switch ($_REQUEST['sortby'])
+		{
+			case "companyd":
+				$sortby = "companyd";
+				$sortbyString = "ORDER BY company DESC";
+				break;
+			case "company";
+			case "companya":
+			default:
+				$sortby = "companya";
+				$sortbyString = "ORDER BY company ASC";
+				break;
+		}
+	}
+	else
+	{
+		$sortby = "companya";
+		$sortbyString = "ORDER BY company ASC";
+	}
+	
+	// Get a count of all available companies
+	$query = "SELECT count(*) as recordCount FROM " . DEALHUNTING_COMPANIES_TABLE . ";";
+	$result = mysql_query($query, $dealhuntingLink) or returnError(902, $query, true, $dealhuntingLink);
+	
+	$row = mysql_fetch_object($result);
+	$recordCount = $row->recordCount;
+	
+	$query = "SELECT id, company, url FROM " . DEALHUNTING_COMPANIES_TABLE . " $sortbyString LIMIT ". (($startPage-1)*ROWS_PER_PAGE) . ", " . ROWS_PER_PAGE. ";";
+	$result = mysql_query($query, $dealhuntingLink) or returnError(902, $query, true, $dealhuntingLink);
+
+	?><table class="contentTable">
+	<tr>
+		<td colspan="3" id="companies_createnew"><input type="button" value="Create New..." onclick="showNewDiv('<?php echo ADMIN_PATH; ?>', '<?php echo $moduleName; ?>', '<?php echo $_SERVER['PHP_SELF']; ?>', <?php echo $module; ?>);" /></td>
+	</tr>
+	<tr class="table_titlebar">
+		<td colspan=3>Companies Administration</td>
+	</tr>
+	<tr>
+		<th>Action</th>
+		<th>Company</th>
+		<th>URL</th>
+	</tr>
+	<?php
+	while ($row = mysql_fetch_object($result))
+	{
+		?><tr>
+		<td nowrap><a href="javascript:showEditDiv(<?php echo $row->id; ?>, '<?php echo ADMIN_PATH; ?>', '<?php echo $moduleName; ?>', '<?php echo $_SERVER['PHP_SELF']; ?>', <?php echo $module; ?>);"><img src="<?php echo ADMIN_PATH; ?>/images/edit.png" alt="<?php echo $row->url; ?>" /></a><a href="javascript:confirmCompanyDelete('<?php echo $row->company; ?>', <?php echo $row->id; ?>, '<?php echo ADMIN_PATH; ?>', '<?php echo $module; ?>');"><img src="<?php echo ADMIN_PATH; ?>/images/delete.png" /></a></td>
+		<td><?php echo $row->company; ?></td>
+		<td><a href="<?php echo $row-url; ?>" target="_blank"><?php
+		if (strlen($row->url) > URL_LENGTH)
+		{
+			echo substr($row->url, URL_LENGTH-3) . '...';
+		}
+		else
+		{
+			echo $row->url;
+		}
+		?></a></td><?php
+	}
+	
+	?><tr>
+			<td colspan="5" style="text-align: right; border: none; background-color: #ece9d8;">
+			<?php
+	
+			echo makePaginationWithLimits($recordCount, $recordsPerPage, $startPage, $sortby);	
+			?>
+			</td>
+		</tr>
+	<tr>
+		<td colspan="5" style="text-align: right; border: none; background-color: #ece9d8;">Sort By:
+		<select name="sortby" onchange="loadSortOrder(this);">
+			<option value="company" <?php if ($sortby == "company" || $sortby == "companya") echo "selected "; ?>>Company (ascending)</option>
+			<option value="companyd" <?php if ($sortby == "companyd") echo "selected "; ?>>Company (descending)</option>
+		</select>
+		</td>
+	</tr>
+	</table>
+<?php
+	
+}
+
+function makePagination($count, $recordsPerPage, $currentPage, $sortby=null)
+{
+	global $module;
+	
+	// Determine how many pages will be needed
+	$pages = ceil($count/$recordsPerPage);
+
+	$output = "";
+	
+	for ($i=1; $i<=$pages; $i++)
+	{
+		if ($i == $currentPage)
+		{
+			$output .= "&nbsp;$i&nbsp;";
+		}
+		else
+		{
+			$output .= "<a href=\"" . ADMIN_PATH . "?module=$module&spage=$i&sortby=$sortby\">$i</a>";
+		}
+		
+		if ($i != $pages)
+		{
+			$output .= "&nbsp;";
+		}
+	}
+	
+	return $output;
+}
+
+function makePaginationWithLimits($count, $recordsPerPage, $currentPage, $sortby=null)
+{
+	global $module;
+	
+	// Determine how many pages will be needed
+	$pages = ceil($count/$recordsPerPage);
+
+	$output = "";
+	
+	// Figure how many links will be displayed before and after the current page link.
+	$showNext = true; // This will remain true as long as the current page is not the last page
+	$showPrevious = true; // This will remain true as long as the current page is not the first page
+	
+	if ($currentPage == 1)
+	{
+		$showPrevious = false;
+	}
+	if ($currentPage == $pages)
+	{
+		$showNext = false;
+	}
+	
+	$linksBefore = floor(MAX_PAGINATION_LINKS/2);
+	$linksAfter = floor(MAX_PAGINATION_LINKS/2);
+	
+	// Make sure that we have enough padding before the current link to include all the "$linksBefore". If not,
+	// add them to $linksAfter
+	if ($currentPage - $linksBefore < 1)
+	{
+		// How many links do we have room for?
+		$limitedLinksBefore = $currentPage - 1;
+		
+		// Add the remainder to "$linksAfter"
+		$linksAfter = ($linksBefore - $limitedLinksBefore) + $linksAfter;
+	}
+	
+	// Make sure that we have enough padding after the current link to include all the "$linksAfter". If not, trim them.
+	if ($currentPage + $linksAfter > $pages)
+	{
+		$linksAfter = $pages - $currentPage;
+	}
+	
+	if (isset($limitedLinksBefore))
+	{
+		if ($limitedLinksBefore > 0)
+		{
+			for ($j = 1; $j <= $limitedLinksBefore; $j++)
+			{
+				$output = "<a href=\"" . ADMIN_PATH . "?module=$module&spage=" . ($currentPage - $j) . "&sortby=$sortby\">" . ($currentPage - $j) . "</a>&nbsp;" . $output;
+			}
+		}
+	}
+	else
+	{
+		for ($j = 1; $j <= $linksBefore; $j++)
+		{
+			$output = "<a href=\"" . ADMIN_PATH . "?module=$module&spage=" . ($currentPage - $j) . "&sortby=$sortby\">" . ($currentPage - $j) . "</a>&nbsp;" . $output;
+		}
+	}
+	
+	$output .= "$currentPage";
+	
+	for ($k = 1; $k <= $linksAfter; $k++)
+	{
+		$output .= "&nbsp;<a href=\"" . ADMIN_PATH . "?module=$module&spage=" . ($k+$currentPage) . "&sortby=$sortby\">" . ($k+$currentPage) . "</a>";
+	}
+	
+	if ($showPrevious)
+	{
+		$output = "<a href=\"" . ADMIN_PATH . "?module=$module&spage=1&sortby=$sortby\"><<&nbsp;</a><a href=\"" . ADMIN_PATH . "?module=$module&spage=" . ($currentPage - 1) . "&sortby=$sortby\"><&nbsp;</a>" . $output;
+	}
+	
+	if ($showNext)
+	{
+		$output = $output . "<a href=\"" . ADMIN_PATH . "?module=$module&spage=" . ($currentPage + 1) . "&sortby=$sortby\">&nbsp;></a><a href=\"" . ADMIN_PATH . "?module=$module&spage=$pages&sortby=$sortby\">&nbsp;>></a>";
+	}	
+	
+	return $output;
+}
+
+function getFieldNames()
+{
+	return array(
+			'edit_company' =>'company',
+			'edit_aff_type' =>'aff_type',
+			'edit_banner' =>'banner',
+			'dp-normal-1' =>'enddate',
+			'edit_url' =>'url',
+			'edit_clean_url' =>'clean_url',
+			'edit_joblo_url' =>'joblo_url',
+			'edit_alert' =>'alert',
+			'edit_usship' =>'usship',
+			'edit_canadaship' =>'canadaship',
+			'edit_ukship' =>'ukship');
+}
+
+function getFieldTypes()
+{
+	return array(
+			'edit_company' =>'string',
+			'edit_aff_type' =>'integer',
+			'edit_banner' =>'text',
+			'dp-normal-1' =>'datetime',
+			'edit_url' =>'string',
+			'edit_clean_url' =>'string',
+			'edit_joblo_url' =>'string',
+			'edit_alert' =>'bool',
+			'edit_usship' =>'checkbox',
+			'edit_canadaship' =>'checkbox',
+			'edit_ukship' =>'checkbox');
+}
+
+?>

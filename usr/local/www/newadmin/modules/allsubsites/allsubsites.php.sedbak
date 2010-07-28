@@ -1,0 +1,861 @@
+<?php
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+$task = getTask();
+
+switch ($task)
+{
+	case 'saveEdit';
+		gatherFormFields('edit');
+		break;
+	case 'saveNew';
+		gatherFormFields('add');
+		break;
+	case 'deleteSubmit';
+		deleteSubmit();
+		break;
+	default:
+		showTable();
+		break;
+}
+
+function deleteSubmit()
+{
+	global $adminLink, $module;
+	
+	if (!isPermitted('delete', $module))
+	{
+		returnError(301, LANGUAGE_ERROR_OPERATION_NOT_PERMITTED, false);
+		returnToMainPage(getStartPage());
+		exit();
+	}
+	
+	if (!isset($_REQUEST['objectid']) || 1 > (int)$_REQUEST['objectid'])
+	{
+		returnError(201, 'A valid ID must be provided.', false);
+		returnToMainPage(getStartPage());
+		exit();
+	}
+	else
+	{
+		$id = (int)$_REQUEST['objectid'];
+		
+		// Retrieve the site name and URL from the database
+		// This will be used when removing the Apach Vhost, and later when
+		// creating the log messages
+		$siteNameQuery = "SELECT `name`, `url`, `db_name_a`, `db_name_b` FROM `" . ADMINPANEL_SUBSITES_TABLENAME . "` WHERE `id`=$id LIMIT 1;";
+		if (false === ($siteNameResult = mysql_query($siteNameQuery, $adminLink)))
+		{
+			returnError(902, $siteNameQuery, false, $adminLink);
+			returnToMainPage(getStartPage());
+			exit();
+		}
+		
+		if (!mysql_num_rows($siteNameResult))
+		{
+			returnError(102, "There is no site in the database matching the ID provided.");
+			returnToMainPage(getStartPage());
+			exit();
+		}
+		
+		$arrResult = mysql_fetch_array($siteNameResult);
+		list($siteName, $siteURL, $dbNameA, $dbNameB) = $arrResult;
+		
+		// Delete the Apache Vhost entry
+		if (substr(ADMINPANEL_VHOSTS_DIRECTORY, -1) == '/')
+		{
+			$vhostFilename = ADMINPANEL_VHOSTS_DIRECTORY . $siteURL . '.conf';
+		}
+		else
+		{
+			$vhostFilename = ADMINPANEL_VHOSTS_DIRECTORY . '/' . $siteURL . '.conf';
+		}
+		
+		if (false === unlink($vhostFilename))
+		{
+			returnError(405, "Unable to delete Vhost file '$vhostFilename'. Please remove the file manually.");
+		}
+		else
+		{
+			returnMessage(1000, "Deleted Apache Vhost '$vhostFilename' for subsite '$siteName' with ID: $id.", false);
+		}
+		
+		// Delete databases associated with this subsite
+		foreach (array($dbNameA, $dbNameB) as $subsiteDatabaseName)
+		{
+			$deleteDatabaseQuery = "DROP DATABASE $subsiteDatabaseName;";
+			if (false === mysql_query($deleteDatabaseQuery, $adminLink))
+			{
+				returnError(902, $deleteDatabaseQuery, true, $adminLink);
+				returnToMainPage(getStartPage());
+				return 0;
+			}
+			else
+			{
+				returnMessage(1101, "Deleted database '$subsiteDatabaseName'", false);
+			}
+		}
+		
+		$deleteKeywordsQuery = "DELETE FROM `" . ADMINPANEL_SUBSITES_KEYWORDS_TABLENAME . "` WHERE `subsite_id`=$id;";
+		if (false === mysql_query($deleteKeywordsQuery, $adminLink))
+		{
+			returnError(902, $deleteKeywordsQuery, false, $adminLink);
+			returnToMainPage(getStartPage());
+			exit();
+		}
+		else
+		{
+			returnMessage(1000, "Deleted all keywords for subsite '$siteName' with ID: $id.", false);
+		}
+		
+		$query = "DELETE FROM " . ADMINPANEL_SUBSITES_TABLENAME . " WHERE `id`=$id LIMIT 1;";
+		if (false === mysql_query($query, $adminLink))
+		{
+			returnError(902, $query, false, $adminLink);
+			returnToMainPage(getStartPage());
+			exit();
+		}
+		else
+		{
+			returnMessage(1101, sprintf(LANGUAGE_DELETE_OBJECT_NAME, 'sub-site', $siteName), false);
+			returnToMainPage(getStartPage());
+			exit();
+		}
+	}
+}
+
+function gatherFormFields($submitType)
+{
+	// This function will gather and sanitize form fields,
+	// then pass the data along to the appropriate function for
+	// editing or insertion.
+		
+	global $adminLink;
+	
+	$arrFields = array(); // To hold the sanitized values
+	
+	// Field: ID
+	if (isset($_POST['site_id']))
+	{
+		$id = (int)$_POST['site_id'];
+	}
+	else
+	{
+		$submitType = 'add'; // Even if this was submitted as an edit, if no subsite_id was provided, create a new record.
+	}
+	
+	// Field: name
+	if (isset($_POST['edit_name']) && !empty($_POST['edit_name']))
+	{
+		$arrFields['name'] = array('string', mysql_real_escape_string($_POST['edit_name'], $adminLink));
+	}
+	else
+	{
+		// This field is required
+		returnError(201, 'A name is required for this sub-site.', false);
+		returnToMainPage();
+		return 0;
+	}
+	
+	// Field: url
+	if (isset($_POST['edit_url']) && !empty($_POST['edit_name']))
+	{
+		$arrFields['url'] = array('string', mysql_real_escape_string($_POST['edit_url'], $adminLink));
+		
+		if (substr($arrFields['url'][1], 0, 4) != 'www.')
+		{
+			// The string does not start with 'www.'
+			$arrFields['url'][1] = 'www.' . $arrFields['url'][1];
+		}
+	}
+	else
+	{
+		// This field is required
+		returnError(201, 'A URL is required for this sub-site.', false);
+		returnToMainPage();
+		return 0;
+	}
+		
+	// Field: databaseusername
+	if (isset($_POST['edit_databaseusername']) && !empty($_POST['edit_databaseusername']))
+	{
+		$arrFields['databaseusername'] = array('string', mysql_real_escape_string($_POST['edit_databaseusername'], $adminLink));
+	}
+	else
+	{
+		// This field is required
+		returnError(201, 'A database username is required.', false);
+		returnToMainPage(getStartPage());
+		return 0;
+	}
+	
+	if (!validate_mysql_username($arrFields['databaseusername'][1]))
+	{
+		// This is not a valid MySQL username
+		returnError(201, "The username '" . $arrFields['databaseusername'][1] . "' is not valid.", false);
+		returnToMainPage(getStartPage());
+		return 0;
+	}
+	
+	// Field: db_password
+	if (isset($_POST['edit_databasepassword']) && !empty($_POST['edit_databasepassword']))
+	{
+		$arrFields['databasepassword'] = array('string', mysql_real_escape_string($_POST['edit_databasepassword'], $adminLink));
+	}
+	else
+	{
+		// This field is required
+		returnError(201, 'A database password is required.', false);
+		returnToMainPage(getStartPage());
+		return 0;
+	}
+	
+	// Retrieve the keywords for this sub-site
+	if (isset($_POST['edit_keywords']) && is_array($_POST['edit_keywords']))
+	{
+		foreach ($_POST['edit_keywords'] as $keyword)
+		{
+			$arrKeywords[] = mysql_real_escape_string($keyword);
+		}
+		$arrFields['keywords'] = array('array', $arrKeywords);
+	}
+	elseif (isset($_POST['edit_keywords']) && !empty($_POST['edit_keywords']))
+	{
+		$arrFields['keywords'] = array('string', mysql_real_escape_string($keyword));
+	}
+	else
+	{
+		$arrFields['keywords'] = array('string', '');
+	}
+	
+	
+	// Redirect to the appropriate function
+	if ($submitType == 'edit')
+	{
+		saveEdit($arrFields, $id);
+	}
+	elseif ($submitType == 'add')
+	{
+		saveNew($arrFields);
+	}
+	else
+	{
+		returnError(301, 'An invalid submit-type was selected. Please contact an administrator. (Script: ' . __FILE__ . ', Line: ' . __LINE__ . ')', false);
+		returnToMainPage();
+		return 0;
+	}
+}
+
+function saveEdit($arrFields, $id)
+{
+	global $adminLink, $module;
+	
+	if (!isPermitted('edit', $module))
+	{
+		returnError(301, LANGUAGE_ERROR_OPERATION_NOT_PERMITTED, false);
+		returnToMainPage();
+		return 0;
+	}
+	
+	// Create the MySQL UPDATE query from the array data
+	$query = "UPDATE " . ADMINPANEL_SUBSITES_TABLENAME . " SET ";
+	
+	$keywordCount = 0;
+	foreach ($arrFields as $column=>$arrMetaField)
+	{
+		list($type, $value) = $arrMetaField;
+		
+		// Create the keyword update query
+		if ($column == 'keywords')
+		{
+			$keywordInsertQuery = "INSERT INTO `frontend_sites_keywords` (`site_id`, `keyword`) VALUES ";
+			if ($type == 'array')
+			{
+				// For some reason, the order of the keywords is getting reversed each time
+				// they are inserted. This line will reverse the reversal, allowing the keywords
+				// to remain in the order selected by the user. 
+				$value = array_reverse($value);
+				
+				foreach ($value as $keywordValue)
+				{
+					$keywordInsertQuery .= " ($id, '". $keywordValue . "'), ";
+				}
+				$keywordCount = count($value);
+			}
+			else
+			{
+				$keywordInsertQuery .= " ($id, '" . $value . "');";
+				$keywordCount = 1;
+			}
+			
+			$keywordInsertQuery = substr($keywordInsertQuery, 0, -2) . ";";
+		}
+		else
+		{
+			switch ($type)
+			{
+				case 'string':
+					$query .= "`$column`='$value', ";
+					break;
+				case 'integer':
+					$query .= "`$column`=" . (int)$value . ", ";
+					break;
+				default:
+					returnError(301, 'Error in line ' . __LINE__ . ' of file ' . __FILE__ . '. Invalid type (\'' . $type . '\') detected in column ' . $column . '.', true);
+					break;			
+			}
+		}
+	}
+	$query = substr($query, 0, -2) . " WHERE `id`=$id LIMIT 1;";
+
+	// Create and execute the keyword-delete query
+	$keywordDeleteQuery = "DELETE FROM `frontend_sites_keywords` WHERE `site_id`=$id;";
+	if (false === mysql_query($keywordDeleteQuery, $adminLink))
+	{
+		returnError(902, $keywordDeleteQuery, false, $adminLink);
+		returnToMainPage();
+		exit();
+	}
+	else
+	{
+		returnMessage(1000, "Deleted existing keywords for site '" . $arrFields['name'] . "'.", false);
+	}
+	
+	if ($keywordCount)
+	{
+		// Execute the keyword insert query
+		if (false === mysql_query($keywordInsertQuery, $adminLink))
+		{
+			returnError(902, $keywordInsertQuery, false, $adminLink);
+			returnToMainPage();
+			exit();
+		}
+		else
+		{
+			$keywordMessage = "Inserted $keywordCount new keyword";
+			if ($keywordCount > 1)
+			{
+				$keywordMessage .= 's';
+			}
+			$keywordMessage .= " for site '" . $arrFields['name'][1] . "'.";
+			returnMessage(1000, $keywordMessage, false);
+		}
+	}
+	
+	// Execute the subsite update query
+	if (false === mysql_query($query, $adminLink))
+	{
+		returnError(902, $query, false, $adminLink);
+		returnToMainPage();
+		exit();
+	}
+	// Update was successful
+	returnMessage(1001, sprintf(LANGUAGE_MODIFY_OBJECT_NAME, 'sub-site', $arrFields['name'][1]), false);
+	returnToMainPage();
+	exit();
+}
+
+function saveNew($arrFields)
+{
+	global $adminLink, $module, $feedDatabase;
+	
+	if (!isPermitted('create', $module))
+	{
+		returnError(301, LANGUAGE_ERROR_OPERATION_NOT_PERMITTED, false);
+		returnToMainPage();
+		return 0;
+	}
+	
+	// Determine if a site with this url already exists
+	$feedDatabase->query("SELECT `id` FROM `frontend_sites` WHERE `url` = '" . $arrFields['url'][1] . "';", false);
+	if ($feedsDatabase->error)
+	{
+		returnToMainPage(getStartPage());
+		return 0;
+	}
+	if ($feedDatabase->rowCount())
+	{
+		// A site already exists with this URL
+		returnError(202, "A site with the URL '" . $arrFields['url'][1] . "' already exists in the database.", false);
+		returnToMainPage(getStartPage());
+		return 0;
+	}
+	
+	// Determine if a site exists with either of the selected datase names.
+	// The purpose is to ensure that database names are not duplicated.
+	$dbErrorOutput = '';
+	
+	foreach (array('control', 'one', 'two') as $databaseNamePrefix)
+	{
+		// See if the database name already exists
+		$feedDatabase->query("SHOW databases LIKE '" . $arrFields['name'][1] . "_$databaseNamePrefix';", false);
+		if ($feedDatabase->error)
+		{
+			returnToMainPage(getStartPage());
+			return 0;
+		}
+		
+		if ($feedDatabase->rowCount())
+		{
+			$dbErrorOutput .= "The database name '" . $arrFields['name'][1] . "_$databaseNamePrefix' already exists on this server.<br />";
+		}
+	}
+
+	if (!empty($dbErrorOutput)) // If an error exists, display it and return
+	{
+		returnError(202, $dbErrorOutput, false);
+		returnToMainPage(getStartPage());
+		return 0;
+	}
+	else
+	{
+		foreach (array('control', 'one', 'two') as $databaseNamePrefix)
+		{
+			// Attempt to create the databases
+			$feedDatabase->query("CREATE DATABASE " . $arrFields['name'][1] . "_$databaseNamePrefix;", false);
+			if ($feedDatabase->error)
+			{
+				returnToMainPage(getStartPage());
+				return 0;
+			}
+			else
+			{
+				returnMessage(1002, "Created database '" . $arrFields['name'][1] . "_$databaseNamePrefix'", false);
+			}
+
+			// Create the database user
+			$feedDatabase->query("GRANT ALL ON " . $arrFields['name'][1] . "_$databaseNamePrefix.* TO '" . $arrFields['databaseusername'][1] . "'@'localhost'"
+				. " IDENTIFIED BY '" . $arrFields['databasepassword'][1] . "';", false);
+			if ($feedDatabase->error)
+			{
+				returnToMainPage(getStartPage());
+				return 0;
+			}
+		} 
+	}
+	
+	// Generate the MySQL INSERT query from the array data
+	$query = "INSERT INTO `frontend_sites`";
+	
+	$columnString = "(";
+	$valuesString = "VALUES (";
+	
+	$keywordCount = 0;
+	foreach ($arrFields as $column=>$arrMetaField)
+	{
+		list($type, $value) = $arrMetaField;
+		
+		// Create the keyword update query
+		if ($column == 'keywords')
+		{
+			$keywordInsertQuery = "INSERT INTO `frontend_sites_keywords` (`site_id`, `keyword`) VALUES ";
+			if ($type == 'array')
+			{
+				// For some reason, the order of the keywords is getting reversed each time
+				// they are inserted. This line will reverse the reversal, allowing the keywords
+				// to remain in the order selected by the user. 
+				$value = array_reverse($value);
+				
+				foreach ($value as $keywordValue)
+				{
+					$keywordInsertQuery .= " (*!*!*!, '". $keywordValue . "'), ";
+					if (!empty($keywordValue))
+					{
+						$keywordCount++;
+					}
+				}
+			}
+			else
+			{
+				if (!empty($value))
+				{
+					$keywordInsertQuery .= " (*!*!*!, '" . $value . "');";
+					$keywordCount = 1;
+				}
+			}
+			
+			$keywordInsertQuery = substr($keywordInsertQuery, 0, -2) . ";";
+		}
+		else
+		{
+			$columnString .= "`$column`, ";
+			
+			switch ($type)
+			{
+				case 'string':
+					$valuesString .= "'$value', ";
+					break;
+				case 'integer':
+					$valuesString .= "$value, ";
+					break;
+				default:
+					returnError(301, 'Error in line ' . __LINE__ . ' of file ' . __FILE__ . '. Invalid type (\'' . $type . '\') detected in column ' . $column . '.', true);
+					break;
+			}
+		}
+	}
+	$columnString = substr($columnString, 0, -2) . ")";
+	$valuesString = substr($valuesString, 0, -2) . ")";
+	
+	$query .= " $columnString $valuesString;";
+	
+	$feedDatabase->query($query, false);
+	if ($feedDatabase->error)
+	{
+		returnToMainPage();
+		exit();
+	}
+	else
+	{
+		// Insert was successful
+		
+		// Get the ID of the new site
+		$id = $feedDatabase->insert_id();
+		
+		returnMessage(1002, sprintf(CREATE_OBJECT_NAME, 'sub-site', $arrFields['name'][1]), false);
+	}
+	
+	// If there are any keywords for this subsite, insert them now.
+	if ($keywordCount)
+	{
+		$keywordInsertQuery = str_replace('*!*!*!', $id, $keywordInsertQuery);
+		
+		// Execute the keyword insert query
+		$feedDatabase->query($keywordInsertQuery, false);
+		if ($feedDatabase->error)
+		{
+			//returnError(902, $keywordInsertQuery, false, $adminLink);
+			returnToMainPage();
+			exit();
+		}
+		else
+		{
+			$keywordMessage = "Inserted $keywordCount new keyword";
+			if ($keywordCount > 1)
+			{
+				$keywordMessage .= 's';
+			}
+			$keywordMessage .= " for bsite '" . $arrFields['name'][1] . "'.";
+			returnMessage(1000, $keywordMessage, false);
+		}
+	}
+	
+	$createVhostResponse = createApacheVhost($arrFields['url'][1]);
+	
+	if ($createVhostResponse == 0)
+	{
+		returnMessage(1000, "Apache Vhost for '" . $arrFields['url'][1] . "' was successfully created.", false);
+	}
+	
+	returnToMainPage();
+	exit();
+}
+
+function createApacheVhost($siteURL)
+{
+	$vhostTemplate = "<VirtualHost *>\n"
+		. "\tServerAdmin %s\n"
+		. "\tServerName %s\n"
+		. "\tServerAlias %s\n"
+		. "\tDocumentRoot %s\n"
+		. "\tErrorLog %s-error_log\n"
+		. "\tTransferLog %s-access_log\n"
+		. "</VirtualHost>\n";
+	
+	if (substr($siteURL, 0, 4) == 'www.')
+	{
+		$serverAlias = substr($siteURL, 4);
+	}
+	else
+	{
+		$serverAlias = $siteURL;
+	}
+			
+	if (substr(ADMINPANEL_VHOSTS_DOCUMENT_ROOT, -1) != '/')
+	{
+		$serverVhostDocumentRoot = ADMINPANEL_VHOSTS_DOCUMENT_ROOT . "/$siteURL";
+	}
+	else
+	{
+		$serverVhostDocumentRoot = ADMINPANEL_VHOSTS_DOCUMENT_ROOT . "$siteURL";
+	}
+
+	// Copy Vhost template into the output string, replacing the variables with correct values
+	$output = sprintf($vhostTemplate, GLOBAL_ADMIN_EMAIL, $siteURL, $serverAlias, $serverVhostDocumentRoot, $siteURL, $siteURL);
+	
+		
+	// Ensure that the directory is writable
+	if (!is_writable(ADMINPANEL_VHOSTS_DIRECTORY))
+	{
+		returnError(401, "The Vhosts directory '" . ADMINPANEL_VHOSTS_DIRECTORY . "' is not writable. The Apache Vhost could not be created for this site.");
+		return 401;
+	}
+	if (substr(ADMINPANEL_VHOSTS_DIRECTORY, -1) != '/')
+	{
+		$vhostFilename = ADMINPANEL_VHOSTS_DIRECTORY . '/' . $siteURL . ".conf";
+	}
+	else
+	{
+		$vhostFilename = ADMINPANEL_VHOSTS_DIRECTORY . $siteURL . ".conf";
+	}
+	
+	if (file_exists($vhostFilename))
+	{
+		returnError(402, "The file '$vhostFilename' already exists. The Apache Vhost could not be created.");
+		return 402;
+	}
+	
+	$fileHandle = @fopen($vhostFilename, 'w');
+	
+	if ($fileHandle === false)
+	{
+		returnError(403, "Unable to open file '$vhostFilename'. The Apache Vhost could not be created.");
+		return 403;
+	}
+	
+	if (false === fwrite($fileHandle, $output))
+	{
+		returnError(404, "Unable to write data to '$vhostFilename'. The Apache Vhost could not be created.");
+		return 404;
+	}
+	
+	fclose($fileHandle);
+	
+	return 0;
+}
+
+function showTable()
+{
+	global $feedDatabase, $module, $moduleName;
+	
+	returnMessage(1000, LANGUAGE_VIEWED_MAIN_PAGE, false);
+	
+	// Set the orderby parameter
+	if (isset($_REQUEST['paging_orderby']) && !empty($_REQUEST['paging_orderby']))
+	{
+		switch ($_REQUEST['paging_orderby'])
+		{
+			default:
+				$orderbyString = "ORDER BY `id` ASC";
+				break;
+		}
+	}
+	else
+	{
+		$orderbyString = "ORDER BY `id` ASC";
+	}
+	
+	// Get a count of all available subsites
+	$feedDatabase->query("SELECT COUNT(*) as `count` FROM `frontend_sites`");
+	
+	include_once "includes/pagination.class.php";
+	
+	$paginator = new Pagination($module, $feedDatabase->rowCount());
+
+	$feedDatabase->query("SELECT `id`, `displayName`, `rotateProducts` FROM `frontend_sites` $orderbyString " . $paginator->getLimitString());
+	
+	// Include the table-creation class
+	include_once "includes/pageContentTable.class.php";
+	
+	// Populate $arrDataRows with the subsite information
+	$arrDataRows = array();
+	foreach ($feedDatabase->objects() as $row)
+	{
+		$actionButtons = null;
+		if (isPermitted('edit', $module))
+		{
+			$actionButtons .= "<a href=\"#\" onclick=\"showEditDiv(" . $row->id . ", '" . ADMINPANEL_WEB_PATH . "', '$moduleName', '" . $_SERVER['PHP_SELF'] . "', $module);\"><img src=\"" .  ADMINPANEL_WEB_PATH . "/images/edit.png\" alt=\"Edit\" /></a>";
+		}
+		if (isPermitted('delete', $module))
+		{
+			$actionButtons .= "<a href=\"#\" onclick=\"confirmSubsiteDelete('" . $row->displayName . "', " . $row->id . ", '" . ADMINPANEL_WEB_PATH . "', '$module');\"><img src=\"" . ADMINPANEL_WEB_PATH. "/images/delete.png\" alt=\"Delete\" /></a>";
+		}
+		if (isPermitted('edit', $module))
+		{
+			// Create a button for the 'load products' action
+			$actionButtons .= "<a href=\"#\" onclick=\"loadProducts(" . $row->id . ")\" title=\"Load Products...\"><img src=\"" . ADMINPANEL_WEB_PATH . "/images/loadproducts.gif" . "\" alt=\"Load Products...\" />";	
+		}
+		
+		if ($row->rotateProducts == 1)
+		{
+			$rotateProducts = "yes";
+		}
+		else
+		{
+			$rotateProducts = "no";
+		}
+		
+		if (!empty($actionButtons))
+		{
+			$arrListOfColumns = array('Action', 'Name', 'Rotate Products');
+			$arrDataRows[] = array('', array(
+				array("class=\"action_buttons wide_action_buttons\"", $actionButtons),
+				array('', htmlspecialchars($row->displayName)),
+				array('', $rotateProducts)
+			));
+		}
+		else
+		{
+			$arrListOfColumns = array('Name', 'Rotate Products');
+			$arrDataRows[] = array('', array(
+				array('', htmlspecialchars($row->displayName)),
+				array('', $rotateProducts)
+			));
+		}
+	}
+	
+	if (isPermitted('create', $module))
+	{
+		$action = "showNewDiv('" . ADMINPANEL_WEB_PATH . "', '" . $moduleName . "', '" . $_SERVER['PHP_SELF'] . "', $module);";
+	}
+	else
+	{
+		$action = '';
+	}
+	
+	// Create an array to hold the "addendum" to the table
+	$arrAddendum = array(
+		$paginator->generateLinkBar()
+	);
+	
+	// Create the table
+	$theTable = new pageContentTable('Sub-Sites', $arrListOfColumns, 'Create Sub-Site', $action, $arrDataRows, $arrAddendum);
+	
+	if ($theTable->error())
+	{
+		returnError(301, $theTable->error(), true);
+	}
+	else
+	{
+		echo $theTable->createTable();
+	}
+}
+
+function oldSshowTable()
+{
+	global $adminLink, $module, $moduleName;
+	
+	returnMessage(1000, LANGUAGE_VIEWED_MAIN_PAGE, false);
+	
+	// Set the orderby parameter
+	if (isset($_REQUEST['paging_orderby']) && !empty($_REQUEST['paging_orderby']))
+	{
+		switch ($_REQUEST['paging_orderby'])
+		{
+			default:
+				$orderbyString = "ORDER BY `id` ASC";
+				break;
+		}
+	}
+	else
+	{
+		$orderbyString = "ORDER BY `id` ASC";
+	}
+	
+	// Get a count of all available subsites
+	$rowCountQuery = "SELECT count(*) as count FROM `" . ADMINPANEL_SUBSITES_TABLENAME . "`;";
+	if (false === ($rowCountResult = mysql_query($rowCountQuery, $adminLink)))
+	{ 
+		returnError(902, $rowCountQuery, true, $adminLink);
+	}
+	list($rowCount) = mysql_fetch_row($rowCountResult);
+	
+	// include the pagination class
+	include_once "includes/pagination.class.php";
+	
+	$paginator = new Pagination($module, $rowCount);
+	
+	// Get a list of subsites from the database
+	$query = "SELECT"
+		. " `id`, `name`, `url`, `db_name_a`, `db_name_b`"
+		. " FROM " . ADMINPANEL_SUBSITES_TABLENAME
+		. " $orderbyString " . $paginator->getLimitString();
+	
+	if (false === ($result = mysql_query($query, $adminLink)))
+	{
+		returnError(902, $query, true, $adminLink);
+	}
+	
+	// Include the table-creation class
+	include_once "includes/pageContentTable.class.php";
+	
+	// Populate $arrDataRows with the subsite information
+	$arrDataRows = array();
+	while (false !== ($row = mysql_fetch_object($result)))
+	{
+		$actionButtons = null;
+		if (isPermitted('edit', $module))
+		{
+			$actionButtons .= "<a href=\"#\" onclick=\"showEditDiv(" . $row->id . ", '" . ADMINPANEL_WEB_PATH . "', '$moduleName', '" . $_SERVER['PHP_SELF'] . "', $module);\"><img src=\"" .  ADMINPANEL_WEB_PATH . "/images/edit.png\" alt=\"Edit\" /></a>";
+		}
+		if (isPermitted('delete', $module))
+		{
+			$actionButtons .= "<a href=\"#\" onclick=\"confirmSubsiteDelete('" . $row->name . "', " . $row->id . ", '" . ADMINPANEL_WEB_PATH . "', '$module');\"><img src=\"" . ADMINPANEL_WEB_PATH. "/images/delete.png\" alt=\"Delete\" /></a>";
+		}
+		if (isPermitted('edit', $module))
+		{
+			// Create a button for the 'load products' action
+			$actionButtons .= "<a href=\"#\" onclick=\"loadProducts(" . $row->id . ")\" title=\"Load Products...\"><img src=\"" . ADMINPANEL_WEB_PATH . "/images/loadproducts.gif" . "\" alt=\"Load Products...\" />";	
+		}
+		if (strlen($row->url) > ADMINPANEL_URL_LENGTH)
+		{
+			$subsiteURL = "<a href=\"" . $row->url . "\" rel=\"external\">" . substr($row->url, ADMINPANEL_URL_LENGTH-3) . "...</a>";
+		}
+		else
+		{
+			$subsiteURL = "<a href=\"" . $row->url. "\" rel=\"external\">" . $row->url . "</a>";
+		}
+		$dbNameString = $row->db_name_a . ', ' . $row->db_name_b;
+		
+		if (!empty($actionButtons))
+		{
+			$arrListOfColumns = array('Action', 'Name', 'URL', 'Databases');
+			$arrDataRows[] = array('', array(
+				array("class=\"action_buttons wide_action_buttons\"", $actionButtons),
+				array('', htmlspecialchars($row->name)),
+				array('', $subsiteURL),
+				array('', $dbNameString)
+			));
+		}
+		else
+		{
+			$arrListOfColumns = array('Name', 'URL', 'Databases');
+			$arrDataRows[] = array('', array(
+				array('', htmlspecialchars($row->name)),
+				array('', $subsiteURL),
+				array('', $dbNameString)
+			));
+		}
+	}
+	
+	if (isPermitted('create', $module))
+	{
+		$action = "showNewDiv('" . ADMINPANEL_WEB_PATH . "', '" . $moduleName . "', '" . $_SERVER['PHP_SELF'] . "', $module);";
+	}
+	else
+	{
+		$action = '';
+	}
+	
+	// Create an array to hold the "addendum" to the table
+	$arrAddendum = array(
+		$paginator->generateLinkBar()
+	);
+	
+	// Create the table
+	$theTable = new pageContentTable('Sub-Sites', $arrListOfColumns, 'Create Sub-Site', $action, $arrDataRows, $arrAddendum);
+	
+	if ($theTable->error())
+	{
+		returnError(301, $theTable->error(), true);
+	}
+	else
+	{
+		echo $theTable->createTable();
+	}
+}

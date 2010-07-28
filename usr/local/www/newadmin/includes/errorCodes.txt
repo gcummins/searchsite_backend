@@ -1,0 +1,8 @@
+200 FAMILY -- INPUT VALIDATION
+   201 - Required fields was not provided
+
+300 FAMILY -- PROCESS ERROR
+   301 - Unwritable file
+
+900 FAMILY == MySQL 
+	902 - Query Failed 

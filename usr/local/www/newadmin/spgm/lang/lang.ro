@@ -1,0 +1,42 @@
+<?php
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'galerie generata cu >SPGM_LINK<';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = 'Pagina >CURRENT_PAGE< din >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'filtru';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'cele noi';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'toate';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Slideshow';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = 'Poza >CURRENT_PIC< din >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'poza';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'poze';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'poza noua';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = 'poze noi';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'galerie noua';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Galeria principala';
+
+?>

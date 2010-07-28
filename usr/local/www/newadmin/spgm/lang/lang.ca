@@ -1,0 +1,46 @@
+<?php
+
+# Language Pack by Pau Amaro Seoane 20/05/05
+
+# link to SPGM - hipervincle al SPGM
+$spgm_cfg['locale']['spgmLink'] = 'galeria generada per >SPGM_LINK<';
+
+# thumbnails navi bar - barra de navegació de previsualitzacions
+$spgm_cfg['locale']['thumbnailNaviBar']  = 'Pàgina >CURRENT_PAGE< de >NB_PAGES<';
+
+# filter label - etiqueta de filtro
+$spgm_cfg['locale']['filter'] = 'filtre';
+
+# filter value for 'new pictures' - valor del filtre per a 'noves fotos'
+$spgm_cfg['locale']['filterNew'] = 'noves';
+
+# filter value for 'all pictures' - valor del filtre per a 'totes les fotos'
+$spgm_cfg['locale']['filterAll'] = 'totes';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'projecció de diapositives';
+
+# pictures navi bar - barra de navegació de fotos
+$spgm_cfg['locale']['pictureNaviBar'] = 'Imatge >CURRENT_PIC< de >NB_PICS<';
+
+# picture label (as in '1 picture') - etiqueta de foto (en singular, com '1 foto')
+$spgm_cfg['locale']['picture'] = 'foto';
+
+# pictures label (as in '2 pictures') - etiqueta de fotos (en plural, como '2 fotos')
+$spgm_cfg['locale']['pictures'] = 'fotos';
+
+# new picture label (as in '1 new picture') - etiqueta de foto nova (en singular, com '1 foto nova')
+$spgm_cfg['locale']['newPicture'] = 'foto nova';
+
+# new pictures label (as in '2 new pictures') - etiqueta de fotos noves (en plural, com '2 fotos noves')
+$spgm_cfg['locale']['newPictures'] = 'fotos noves';
+
+# new gallery label - etiqueta de 'nova galeria'
+$spgm_cfg['locale']['newGallery'] = 'nova galeria';
+
+# main gallery label - etiqueta de galeria principal
+$spgm_cfg['locale']['rootGallery'] = 'Galeria principal';
+
+?>
+
+

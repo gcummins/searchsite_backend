@@ -1,0 +1,19 @@
+table.contentTable td#companies_createnew
+{
+	text-align: right;
+	border: none;
+	background-color: #ece9d8;
+}
+table.contentTable tr:hover td#companies_createnew
+{
+	background-color: #ece9d8;
+	cursor: default;
+}
+table.contentTable a img 
+{
+	border: none;
+}
+.form_button_div
+{
+	margin: 0px 12px 12px 0px;
+}

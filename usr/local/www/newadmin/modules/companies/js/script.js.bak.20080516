@@ -1,0 +1,304 @@
+function showNewDiv(adminPath, moduleName, scriptName, module)
+{
+	var wWidth = getWindowWidth();
+	
+	var leftEdge = wWidth/2 - modalWidth/2; // modalWidth is defined in index.js.php
+	
+	document.getElementById('edit_div').style.left = leftEdge + 'px';
+	
+	xmlHttpModal = getXmlHttpObject();
+	
+	var date = new Date();
+	var timestamp = date.getTime();	
+
+	var url = adminPath + '/modules/' + moduleName + '/fakeModalContents.php?time=' + timestamp + '&scriptname=' + scriptName + '&module=' + module;
+	
+	xmlHttpModal.onreadystatechange=modalResponseReceived;
+	xmlHttpModal.open("GET",url,true);
+	xmlHttpModal.send(null);	
+	
+	populateAffiliateSelect(adminPath, moduleName);
+
+	//document.getElementById('edit_div').style.display			= "block";
+	//document.getElementById('modalContainer').style.display			= "block";
+}
+function hideEditDiv()
+{
+	//document.getElementById('edit_div').style.display			= "none";
+	document.getElementById('modalContainer').style.display			= "none";
+}
+function submitChanges(serverPath, module)
+{
+	alert("Function stub.");
+}
+function showSection(sectionName)
+{
+	hideAllSections();
+	
+	document.getElementById('section_' + sectionName + '_li').className = 'section_active';
+	thisSection = document.getElementById('section_'+sectionName);
+	thisSection.className = 'showIt';
+	return true;
+	}
+function hideAllSections()
+{
+	var arrSections = new Array();
+	arrSections[0] = 'general';
+	arrSections[1] = 'url';
+	arrSections[2] = 'coupons';
+	arrSections[3] = 'shipping';
+
+	for (var i=0; i<arrSections.length; i++)
+	{
+		//document.getElementById('section_' + arrSections[i]).style.display = 'none';
+		document.getElementById('section_' + arrSections[i]).className = 'hideIt';
+		document.getElementById('section_' + arrSections[i] + '_li').className = 'section_inactive';
+	}
+	
+	return true;
+}
+
+function populateAffiliateSelect(adminPath, moduleName)
+{
+	xmlHttpAffiliate=getXmlHttpObject();
+	
+	var date = new Date();
+	var timestamp = date.getTime();	
+
+	var url = adminPath + '/modules/' + moduleName + '/companyaffiliates.php?time=' + timestamp; // The timestamp is simply to stop IE from serving cached copies of the request.
+
+	xmlHttpAffiliate.onreadystatechange=affiliateFetchStateChanged;
+	xmlHttpAffiliate.open("GET",url,true);
+	xmlHttpAffiliate.send(null);
+}
+
+function affiliateFetchStateChanged()
+{
+		if (xmlHttpAffiliate.readyState == 4 || xmlHttpAffiliate.readyState == "complete")
+		{
+			if (xmlHttpAffiliate.status == 200)
+			{
+				// If the object 'affiliateResponseObject' already exists and has data, clear it
+				if (typeof(eval(window)[affiliateResponseObject]) != 'undefined')
+				{
+					for (j=0; j<affiliateResponseObject.length; j++)
+					{
+						affiliateResponseObject[i] = null;
+					}
+				}			
+
+				// Receive the list of affiliates in JSON format, and populate the Affiliate_type select control
+				var affiliateResponseObject = eval('('+xmlHttpAffiliate.responseText+')');
+				
+				affiliateSelectOutput = document.getElementById('edit_aff_type');
+				
+				for (i=0; i<affiliateResponseObject.affiliates.length; i++)
+				{
+					var affiliateSelectOption = document.createElement('option');
+
+					affiliateSelectOption.value = affiliateResponseObject.affiliates[i].affiliate_type_id;
+					//affiliateSelectOption.innerHTML = affiliateResponseObject.affiliates[i].label;
+					betterInnerHtml(affiliateSelectOption, affiliateResponseObject.affiliates[i].label, true);
+					affiliateSelectOutput.appendChild(affiliateSelectOption);
+					
+					//alert("ID: " + affiliateResponseObject.affiliates[i].affiliate_type_id + ", Label: " + affiliateResponseObject.affiliates[i].label);
+				}
+			}
+			else
+			{
+				if (xmlHttpAffiliate.status == 404)
+				{
+					alert("Request failed because the target script does not exist.");
+				}
+				else if (xmlHttpAffiliate.status == 503)
+				{
+					alert("Request failed because the target script permissions make it inaccessible.");
+				}
+				else
+				{
+					alert("Request failed with HTTP Response Code "+xmlHttpAffiliate.status);
+				}
+			}
+			
+		}	
+}
+function modalResponseReceived()
+{
+	if (xmlHttpModal.readyState == 4 || xmlHttpModal.readyState == "complete")
+	{		
+			/*
+			var dialogTitle = document.createElement('h3');
+			dialogTitle.setAttribute('id', 'edit_div_title');
+			dialogTitle.innerHTML = 'New Company';
+			
+			var detailTable = document.createElement('table');
+			//detailTable.setAttribute('style', 'width: 98%');
+			detailTable.style.width = "98%";
+			
+			var detailTableBody = document.createElement('tbody');
+			//betterInnerHtml(detailTableBody, '<tr><td>Spam</td></tr>', true);
+			
+			var detailTableRow = document.createElement('tr');
+			
+			var detailTableCell = document.createElement('td');
+			//detailTableCell.setAttribute('class', 'detail_cell');
+			detailTableCell.className = 'detail_cell';
+			
+			var navigationList = document.createElement('ul');
+			navigationList.setAttribute('id', 'edit_div_navigation');
+			
+			var listItemGeneral = document.createElement('li');
+			listItemGeneral.setAttribute('id', 'section_general_li');
+			listItemGeneral.onclick = new Function ("showSection('general')");
+			betterInnerHtml(listItemGeneral, 'General', true);
+			
+			var listItemURL = document.createElement('li');
+			listItemURL.setAttribute('id', 'section_url_li');
+			listItemURL.onclick = new Function ("showSection('url')");
+			betterInnerHtml(listItemURL, 'URL', true);
+			
+			var listItemCoupons = document.createElement('li');
+			listItemCoupons.setAttribute('id', 'section_coupons_li');
+			listItemCoupons.onclick = new Function ("showSection('coupons')");
+			betterInnerHtml(listItemCoupons, 'Coupons', true);
+			
+			var listItemShipping = document.createElement('li');
+			listItemShipping.setAttribute('id', 'section_shipping_li');
+			listItemShipping.onclick = new Function ("showSection('shipping')");
+			betterInnerHtml(listItemShipping, 'Shipping', true);
+			
+			navigationList.appendChild(listItemGeneral);
+			navigationList.appendChild(listItemURL);
+			navigationList.appendChild(listItemCoupons);
+			navigationList.appendChild(listItemShipping);
+			
+			detailTableCell.appendChild(navigationList);
+			
+			divSectionContainer = document.createElement('div');
+			divSectionContainer.setAttribute('id', 'section_container');
+			
+			divSectionGeneral = document.createElement('div');
+			divSectionGeneral.setAttribute('id', 'section_general');
+			
+			generalLabelCompany = document.createElement('label');
+			generalLabelCompany.innerHTML = 'Company';
+			generalInputCompany = document.createElement('input');
+			generalInputCompany.setAttribute('type', 'text');
+			generalInputCompany.setAttribute('id', 'edit_company');
+			
+			generalLabelAffiliateType = document.createElement('label');
+			generalLabelAffiliateType.innerHTML = 'Affiliate Type';
+			generalInputAffiliateType = document.createElement('select');
+			generalInputAffiliateType.setAttribute('id', 'edit_aff_type');
+			
+			generalInputAffTypeOption = document.createElement('option');
+			generalInputAffTypeOption.innerHTML = "Choose One...";
+			generalInputAffTypeOption.value = '';
+			
+			generalInputAffiliateType.appendChild(generalInputAffTypeOption);
+			
+			generalLabelBanner = document.createElement('label');
+			generalLabelBanner.innerHTML = 'Banner';
+			generalInputBanner = document.createElement('textarea');
+			generalInputBanner.setAttribute('rows', '3');
+			generalInputBanner.setAttribute('cols', '10');
+			generalInputBanner.setAttribute('id', 'edit_banner');
+			
+			generalLabelBannerExpiration = document.createElement('label');
+			generalLabelBannerExpiration.innerHTML = 'Banner Expiration';
+			//generalInputBannerExpiration = document.createElement('input');
+			generalInputBannerExpiration = createNamedElement('input', 'dp-normal-1');
+			generalInputBannerExpiration.setAttribute('type', 'text');
+			generalInputBannerExpiration.setAttribute('id', 'edit_expiration_date');
+			generalInputBannerExpiration.setAttribute('name', 'dp-normal-1');			
+			generalInputBannerExpiration.className = 'w8em format=y-m-d divider-dash range-low-2008-01-01 range-high-2010-12-31';
+			
+			divSectionGeneral.appendChild(generalLabelCompany);
+			divSectionGeneral.appendChild(generalInputCompany);
+			divSectionGeneral.appendChild(document.createElement('br'));
+
+			divSectionGeneral.appendChild(generalLabelAffiliateType);
+			divSectionGeneral.appendChild(generalInputAffiliateType);
+			divSectionGeneral.appendChild(document.createElement('br'));
+			
+			divSectionGeneral.appendChild(generalLabelBanner);
+			divSectionGeneral.appendChild(generalInputBanner);
+			divSectionGeneral.appendChild(document.createElement('br'));
+
+			divSectionGeneral.appendChild(generalLabelBannerExpiration);
+			divSectionGeneral.appendChild(generalInputBannerExpiration);
+			divSectionGeneral.appendChild(document.createElement('br'));
+			
+			divSectionURL = document.createElement('div');
+			divSectionURL.setAttribute('id', 'section_url');
+			divSectionURL.innerHTML = "Dummy URL Text";
+			
+			divSectionCoupons = document.createElement('div');
+			divSectionCoupons.setAttribute('id', 'section_coupons');
+			divSectionCoupons.innerHTML = "Dummy Coupons Text";
+			
+			divSectionShipping = document.createElement('div');
+			divSectionShipping.setAttribute('id', 'section_shipping');
+			divSectionShipping.innerHTML = "Dummy Shipping Text";
+
+			divSectionContainer.appendChild(divSectionGeneral);
+			divSectionContainer.appendChild(divSectionURL);
+			divSectionContainer.appendChild(divSectionCoupons);
+			divSectionContainer.appendChild(divSectionShipping);
+			
+			var submitButton = document.createElement('input');
+			submitButton.onclick = new Function ("submitChanges('', 0)");
+			submitButton.className = "inputbutton";
+			submitButton.value = "Submit";
+			submitButton.setAttribute('type', 'button');
+			
+			var cancelButton = document.createElement('input');
+			cancelButton.onclick = new Function ("hideEditDiv()");
+			cancelButton.className = "inputbutton";
+			cancelButton.value = "Cancel";
+			cancelButton.setAttribute('type', 'button');
+			
+			detailTableCell.appendChild(divSectionContainer);
+			detailTableCell.appendChild(submitButton);	
+			detailTableCell.appendChild(cancelButton);
+			
+			
+			detailTableRow.appendChild(detailTableCell);
+			//detailTableBody.appendChild(detailTableRow);
+			detailTable.appendChild(detailTableBody);
+			detailTable.tBodies[0].appendChild(detailTableRow);
+			*/
+			var tempnewdiv = document.createElement('div');
+			tempnewdiv.innerHTML = xmlHttpModal.responseText;
+			//tempnewdiv.appendChild(dialogTitle);
+			//tempnewdiv.appendChild(detailTable);
+			
+			var container = document.getElementById('edit_div');
+			// Clear anything that is already in 'edit_div'
+			betterInnerHtml(container, '', true);
+			container.appendChild(tempnewdiv);
+
+			document.getElementById('modalContainer').style.display = "block";
+			showSection('general');
+	}
+}
+
+function createNamedElement(type, name)
+{
+	// From: http://www.thunderguy.com/semicolon/2005/05/23/setting-the-name-attribute-in-internet-explorer/
+	var element = null;
+	
+	try
+	{
+		element = document.createElement('<' + type + ' name=' + name + '">');
+	}
+	catch (e)
+	{	}
+	if (!element || element.nodeName != type.toUpperCase())
+	{
+		// This is a non-IE browser, so use the standards-oriented method to create the named element
+		element = document.createElement(type);
+		element.name = name;
+	}
+	return element;
+}

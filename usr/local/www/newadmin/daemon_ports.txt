@@ -1,0 +1,8 @@
+Daemon Ports Used
+
+
+Dataloader							none
+LinkShare Monitor				none
+Dataloader-Allsites				none
+LinkShare Monitor-Allsites	none
+CommandProxy					3050

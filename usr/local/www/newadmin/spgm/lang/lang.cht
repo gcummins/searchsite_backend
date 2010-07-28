@@ -1,0 +1,45 @@
+<?php
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = '<span lang="zh-cn">相簿由>SPGM_LINK<生成</span>';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = '<span lang="zh-cn">第>CURRENT_PAGE<頁 共>NB_PAGES<頁</span>';
+
+# filter label
+$spgm_cfg['locale']['filter'] = '<span lang="zh-cn">過濾</span>';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = '<span lang="zh-cn">新</span>';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = '<span lang="zh-cn">全部</span>';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = '<span lang="zh-cn">自動播放</span>';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = '<span lang="zh-cn">第>CURRENT_PIC<張 共>NB_PICS<張</span>';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = '<span lang="zh-cn">張照片</span>';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = '<span lang="zh-cn">張照片</span>';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = '<span lang="zh-cn">新照片</span>';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = '<span lang="zh-cn">新照片</span>';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = '<span lang="zh-cn">新影集</span>';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = '<span lang="zh-cn">主影集</span>';
+
+# Title for EXIF data screen
+$spgm_cfg['locale']['exifHeading'] = 'EXIF資料在';
+
+?>

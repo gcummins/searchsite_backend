@@ -1,0 +1,304 @@
+function showNewDiv(todayDate)
+{
+	// First, populate fields with any required information
+	// Fields that need info: 
+	//   edit_start_date (todays date)
+	//   edit_enabled_yes (checked)
+	//   edit_delete_when_expired_no (checked)
+	
+	document.getElementById("edit_start_date").value = todayDate;
+	document.getElementById("edit_ad_enabled_yes").checked = true;
+	document.getElementById("edit_delete_if_expired_no").checked = true;
+	document.getElementById("edit_div_title").innerHTML = "Create a Top Deal";
+	document.getElementById("edit_task").value = "saveNew";
+	
+	the_edit_div = document.getElementById("edit_div");
+	the_edit_div.style.width = "650px";
+	the_edit_div.style.left = "32%";
+
+	document.getElementById("order_select_cell").style.display = "inline";
+
+	the_edit_div.style.display = "block";
+}
+
+function updateEditImage(imageField)
+{	
+	document.getElementById('editDivImage').src = imageField.value;
+}
+function showNewDiv_2(adminPath, scriptName, module, moduleName)
+{
+	setModalPosition();
+	
+	xmlHttpModal = getXmlHttpObject();
+	
+	var date = new Date();
+	var timestamp = date.getTime();
+	
+	var url = adminPath + '/modules/' + moduleName + '/fakeModalContents.php?time=' + timestamp + '&scriptname=' + scriptName + '&module=' + module + '&modulename=' + moduleName;
+
+	xmlHttpModal.onreadystatechange= function()
+	{
+		modalResponseReceived();
+	}
+	xmlHttpModal.open("GET",url,true);
+	xmlHttpModal.send(null);
+}
+function showEditDiv_2(topdealId, adminPath, scriptName, module, moduleName)
+{
+	setModalPosition();
+	
+	xmlHttpModal = getXmlHttpObject();
+	
+	var date = new Date();
+	var timestamp = date.getTime();
+	
+	var url = adminPath + '/modules/' + moduleName + '/fakeModalContents.php?time=' + timestamp + '&scriptname=' + scriptName + '&module=' + module + '&modulename=' + moduleName + '&topdealid=' + topdealId;
+
+	xmlHttpModal.onreadystatechange= function()
+	{
+		modalResponseReceived();
+	}
+	xmlHttpModal.open("GET",url,true);
+	xmlHttpModal.send(null);
+}
+function showEditDiv(topdeal_id, enabled, image, linkurl, impression, alttext, linktext, subtext, start_date, end_date, delete_if_expired)
+{
+	document.getElementById('edit_div_title').innerHTML = "Edit Top Deal";
+	document.getElementById('topdeal_id').value = topdeal_id;
+	if (enabled == 1)
+	{
+		document.getElementById('edit_ad_enabled_yes').checked = true;
+	}
+	else
+	{
+		document.getElementById('edit_ad_enabled_no').checked = true;
+	}
+	document.getElementById('editDivImage').src = image;
+	document.getElementById('edit_image').value = image;
+	document.getElementById('edit_link').value = linkurl;
+	document.getElementById('edit_impression').value = impression;
+	document.getElementById('edit_alttext').value = alttext;
+	document.getElementById('edit_linktext').value = linktext;
+	document.getElementById('edit_subtext').value = subtext;
+	if (start_date != '0000-00-00')
+	{
+		document.getElementById('edit_start_date').value = start_date;
+		//document.getElementById('dp-normal-1').value = start_date;
+	}
+	else
+	{
+		document.getElementById('edit_start_date').value = '';
+		//document.getElementById('dp-normal-1').value = '';
+	}
+	if (end_date != '0000-00-00')
+	{
+		document.getElementById('edit_end_date').value = end_date;
+	}
+	else
+	{
+		document.getElementById('edit_end_date').value = '';
+	}
+	
+	if (delete_if_expired == '1')
+	{
+		document.getElementById('edit_delete_if_expired_yes').checked = true;
+	}
+	else
+	{
+		document.getElementById('edit_delete_if_expired_no').checked = true;
+	}
+	
+	// Hide the extra table cell that contains the image ordering select
+	the_edit_div = document.getElementById("edit_div");
+	the_edit_div.style.width = "500px";
+	the_edit_div.style.left = "38%";
+	
+	document.getElementById("order_select_cell").style.display = "none";
+	
+	document.getElementById('edit_task').value = "saveChanges";
+	the_edit_div.style.display = "block";
+	//document.getElementById('edit_div').style.visibility = "visible";
+}
+function hideEditDiv()
+{
+	document.getElementById('modalContainer').style.display = "none";
+}
+function validateForm_topdeals(adminPath, moduleName)
+{	
+	var validSubmission = true;
+	
+	// Check the Link field
+	if (document.getElementById('edit_link').value == '' || document.getElementById('edit_link').value == 'http://')
+	{
+		alert("A link must be provided for this Top Deal.");
+		document.getElementById('edit_link').focus();
+		return false;
+	}
+	else if ('http://' != document.getElementById('edit_link').value.substring(0, 7))
+	{
+		if (confirm("Top Deal links must begin with 'http://'. Shall I add it for you?"))
+		{
+			var existingString = document.getElementById('edit_link').value;
+			document.getElementById('edit_link').value = 'http://' + existingString;
+			
+			validSubmission = validateURL('edit_link', 'link', adminPath, moduleName);
+		}
+		else
+		{
+			document.getElementById('edit_link').focus();
+			return false;
+		}
+	}
+	else
+	{
+		validSubmission = validateURL('edit_link', 'link', adminPath, moduleName);
+	}
+	
+	if (!validSubmission)
+	{
+		alert("The Link URL is not valid. Please check the URL and try again.");
+		document.getElementById('edit_link').focus();
+		return false;
+	}
+	else
+	{
+		// Check the Image field
+		if (document.getElementById('edit_image').value == '' || document.getElementById('edit_image').value == 'http://')
+		{
+			alert("An image URL must be provided for this Top Deal.");
+			document.getElementById('edit_image').focus();
+			return false;
+		}
+		else if ('http://' != document.getElementById('edit_image').value.substring(0, 7))
+		{
+			if (confirm("Top Deal image URLs must begin with 'http://'. Shall I add it for you?"))
+			{
+				var existingString2 = document.getElementById('edit_image').value;
+				document.getElementById('edit_image').value = 'http://' + existingString2;
+			
+				validSubmission = validateURL('edit_image', 'image link', adminPath, moduleName);
+			}
+			else
+			{
+				document.getElementById('edit_image').focus();
+				return false;
+			}
+		}
+		else
+		{
+			validSubmission = validateURL('edit_image', 'image link', adminPath, moduleName);
+		}
+		
+		if (document.getElementById('edit_impression').value != '') // Do not bother checking if nothing is in this field
+		{
+			if ('http://' != document.getElementById('edit_impression').value.substring(0, 7))
+			{
+				if (confirm("Hit Tracker URLs must begin with 'http://'. Shall I add it for you?"))
+				{
+					var existingString3 = document.getElementById('edit_impression').value;
+					document.getElementById('edit_impression').value = 'http://' + existingString3;
+					
+					validSubmission = validateURL('edit_impression', 'hit tracker', adminPath, moduleName);
+				}
+				else
+				{
+					document.getElementById('edit_impression').focus();
+					return false;
+				}
+			}
+			else
+			{
+				validSubmission = validateURL('edit_impression', 'hit tracker', adminPath, moduleName);
+			}
+		}
+		
+		if (!validSubmission)
+		{
+			alert("The Hit Tracker URL is not valid. Please check the URL and try again.");
+			document.getElementById('edit_impression').focus();
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+}
+function validateURL(formField, fieldName, adminPath, moduleName)
+{
+	var url = document.getElementById(formField).value;
+	if (url == '')
+	{
+		alert("URL is empty. Returning...");
+		return false;
+	}
+	
+	xmlHttpValidateUrl = getXmlHttpObject();
+	
+	var date = new Date();
+	var timestamp = date.getTime();
+	
+	validateResponseIsValid = false;
+	var backendUrl = adminPath + '/modules/' + moduleName + '/checkValidURL.php?time=' + timestamp + '&url=' + encodeURIComponent(url);
+
+	showAJAXWaitControl('Checking URL...');
+	xmlHttpValidateUrl.open("GET",backendUrl,false);
+	xmlHttpValidateUrl.send(null);
+	hideAJAXWaitControl();
+	
+	var validateUrlResponseValue = xmlHttpValidateUrl.responseText;
+	if (validateUrlResponseValue == '0')
+	{
+		validateResponseIsValid = true;
+	}
+	else
+	{
+		validateResponseIsValid = false;
+	}
+	return validateResponseIsValid;
+}
+
+function updateAJAXWaitControl()
+{
+	var theReadyState = xmlHttpValidateUrl.readyState;
+	if (theReadyState == "loading" || theReadyState == 0 || theReadyState == 1 || theReadyState == 2 || theReadyState == 3)
+	{
+		// Display the control
+		showAJAXWaitControl('Checking URL...');
+		
+	}
+	else if (theReadyState == 4 || theReadyState == "complete")
+	{
+		// Hide the control
+		hideAJAXWaitControl();
+		validateUrlResponseValue = xmlHttpValidateUrl.responseText;
+	}
+}
+function confirmDeleteAd(serverPath, module, topdealId)
+{
+	if (confirm("Are you sure you wish to delete this Top Deal?"))
+	{
+		var targetLocation = serverPath + '?module=' + module + '&task=deletead&topdealid=' + topdealId;
+		location.href = targetLocation;
+	}
+}
+function modalResponseReceived()
+{
+	if (xmlHttpModal.readyState == 4 || xmlHttpModal.readyState == "complete")
+	{
+		var tempnewdiv = document.createElement('div');
+		tempnewdiv.innerHTML = xmlHttpModal.responseText;
+		var container = document.getElementById('edit_div');
+		
+		// Clear anything that is already in 'edit_div'
+		betterInnerHtml(container, '', true);
+		container.appendChild(tempnewdiv);
+
+		//document.getElementById('edit_div').style.width=editDivWidth + 'px';
+		document.getElementById('modalContainer').style.display = "block";
+
+		datePickerController.create();
+		
+		return true;
+	}
+}

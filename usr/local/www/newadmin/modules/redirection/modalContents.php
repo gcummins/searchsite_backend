@@ -1,0 +1,91 @@
+<?php
+
+require_once "../includes/backend_requirements.php";
+
+$scriptName = htmlentities($_REQUEST['scriptname']);
+$module = (int)$_REQUEST['module'];
+
+if (isset($_REQUEST['redirectionid']) && !empty($_REQUEST['redirectionid']))
+{
+	$id = (int)$_REQUEST['redirectionid'];
+	
+	$query = "SELECT `url`, `description` FROM " . DEALHUNTING_REDIRECTION_TABLE . " WHERE `id`=$id LIMIT 1;";
+	
+	$dealhuntingDatabase->query($query, false);
+	
+	if ($dealhuntingDatabase->error)
+	{
+		returnError(902, $query, true, $dealhuntingDatabase, 'ajax');
+	}
+	
+	$row = $dealhuntingDatabase->firstObject();
+	
+	$formTitle = "Edit Redirection";
+	$description = $row->description;
+	$url = $row->url;
+	$task = "saveEdit";
+	
+	if (isset($_REQUEST['spage']) && !empty($_REQUEST['spage']))
+	{
+		$spage = (int)$_REQUEST['spage'];
+	}
+	else
+	{
+		$spage = null;
+	}
+	
+	if (isset($_REQUEST['rpp']) && !empty($_REQUEST['rpp']))
+	{
+		$rpp = (int)$_REQUEST['rpp'];
+	}
+	else
+	{
+		$rpp = null;
+	}
+}
+else
+{
+	$id = null;
+	$formTitle = "Create Redirection";
+	$description = '';
+	$url = '';
+	$task = "saveNew";
+}
+
+$sortby = "id";
+$spage = 1;
+$rpp = 20;
+$module = 30;
+
+$adminPath = ADMINPANEL_WEB_PATH;
+
+echo <<< HEREDOC1
+<span class="edit_div_title">$formTitle</span>
+		<table>
+			<tbody>
+			<tr>
+				<td class="detail_cell">
+				<form action="$scriptName" method="post">
+					<div>
+						<label>Description:</label>
+						<input name="redirection_description" id="redirection_description" value="$description" type="text"><br />
+						<label>URL:</label>
+						<input name="redirection_url" id="redirection_url" value="$url" type="text">
+					</div>
+					<div class="form_button_div">
+						<input value="Submit" onclick="return submitChanges('$adminPath/');" type="submit">
+						<input value="Cancel" onclick="hideEditDiv();" type="button">
+					</div>
+					<input name="redirection_id" id="redirection_id" value="$id" type="hidden" />
+					<input name="task" id="redirection_task" value="$task" type="hidden" />
+					<input name="sortby" id="sortby" value="$sortby" type="hidden" />
+					<input name="spage" id="spage" value="$spage" type="hidden" />
+					<input name="rpp" id="rpp" value="$rpp" type="hidden" />
+					<input name="module" id="module" value="$module" type="hidden" />
+				</form>
+				</td>
+			</tr>
+			</tbody>
+		</table>
+HEREDOC1;
+?>

@@ -1,0 +1,48 @@
+body, html
+{
+	background-color: #fff;
+	padding: 0;
+	margin: 0;
+	font-family: Arial, Verdana, sans;
+	height: 100%;
+}
+#login
+{
+	width: 565px;
+	height: 240px;
+	border: 2px solid #000;
+	margin: 15% auto;
+	background-color: #c0c0c0;
+	background-repeat: no-repeat;
+	background-position: 10px 45px;
+}
+#login_prompt
+{
+	height: 198px;
+	width: 325px;
+	margin-top: 21px;
+	margin-left: 215px;
+	font-size: 85%;
+	background-repeat: no-repeat;
+	background-position: left top;
+}
+#login_prompt form
+{
+	padding-top: 90px;
+}
+#login_prompt label
+{
+	display: block;
+	width: 75px;
+	float: left;
+	text-align: right;
+	margin-left: 100px;
+	margin-right: 10px;
+}
+
+#login_prompt input.text
+{
+	width: 100px;
+	border: 1px solid #7f9db9;
+	margin-bottom: 5px;
+}

@@ -1,0 +1,438 @@
+<?php
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+$task = false;
+if (isset($_REQUEST['task']) && !empty($_REQUEST['task']))
+{
+	$task = $_REQUEST['task'];
+}
+
+switch ($task)
+{
+	case 'saveNew':
+		saveNewAd();
+		break;
+	case 'deletead':
+		deleteAd();
+		break;
+	case 'reorder':
+		reorderAd();
+		break;
+	case 'saveChanges':
+		saveChanges();
+	default:
+		showTable();
+		break;
+}	
+
+function returnToMainPage()
+{
+	global $module;
+	?>
+	<script type="text/javascript">
+	location.href="<?php echo ADMIN_PATH . "?module=$module"; ?>";
+	</script>
+	<?php	
+}
+
+function deleteAd()
+{
+	global $dealhuntingLink;
+	
+	if (isset($_REQUEST['aid']) && intval($_REQUEST['aid'] > 0))
+	{
+		$adToDelete = intval($_REQUEST['aid']);
+	}
+	else
+	{
+		showTable();
+		return -1;
+	}
+
+	$query = "DELETE FROM " . DEALHUNTING_TOPDEALS_TABLE. " WHERE id=$adToDelete LIMIT 1;";
+	mysql_query($query, $dealhuntingLink) or returnError(902, $query, 'true', $dealhuntingLink);
+	
+	returnToMainPage();
+}
+function reorderAd()
+{
+	global $dealhuntingLink;
+
+	if (isset($_REQUEST['aid']))
+	{
+		$adToReorder = intval($_REQUEST['aid']);
+	}
+	else
+	{
+		// The ad ID that was provided is invalid. Just exit.
+		showTable();
+		return -1;
+	}
+	
+	$query = "SELECT id, ordering FROM " . DEALHUNTING_TOPDEALS_TABLE . " ORDER BY ordering;";
+	$result = mysql_query($query, $dealhuntingLink) or returnError(902, $query, 'true', $dealhuntingLink);
+
+	$arrIdsAndOrdering = array();
+	
+	while ($row = mysql_fetch_object($result))
+	{
+		$arrIdsAndOrdering[$row->id] = $row->ordering;
+	}
+
+	checkAdOrdering($arrIdsAndOrdering);
+	
+	// Now determine which direction we are moving the selected ad
+	if (isset($_REQUEST['orderdir']) && !empty($_REQUEST['orderdir']) && ($_REQUEST['orderdir'] == 'up' || $_REQUEST['orderdir'] == 'down'))
+	{
+		// We have a valid ad id and a valid direction
+		// Do an extra check to ensure that the new ordering value will not place the ad ordering outside of the required range
+		$orderDirection = $_REQUEST['orderdir'];
+		$currentOrdering = intval($_REQUEST['curorder']);
+		if ($orderDirection == 'up' && $currentOrdering == 1)
+		{
+			// No sense in trying to get higher in the list than the first position...
+			return 0;
+		}
+		elseif ($orderDirection == 'down' && $currentOrdering == max($arrIdsAndOrdering))
+		{
+			// Do not try to get lower than the last position.
+			return 0;
+		}
+		else
+		{
+			switch ($orderDirection)
+			{
+				case 'up':
+					$factor = -1;
+					break;
+				case 'down':
+					$factor = 1;
+					break;
+				default:
+					die("For some reason, and invalid orderDirection was provided. Please contact a system administrator to examine " . $_SERVER['SCRIPT_FILENAME'] . ", line " . __LINE__);
+					break;
+			}
+			
+			//echo "Moving Ad ID: $adToReorder from position $currentOrdering $orderDirection to position " . ($currentOrdering + $factor) . ".<br />";
+			
+			$query = "UPDATE " . DEALHUNTING_TOPDEALS_TABLE . " SET ordering=$currentOrdering WHERE ordering=" . ($currentOrdering + $factor) . ";";
+			mysql_query($query, $dealhuntingLink) or returnError(902, $query, 'true', $dealhuntingLink);
+			
+			$query = "UPDATE " . DEALHUNTING_TOPDEALS_TABLE . " SET ordering=" . ($currentOrdering + $factor) . " WHERE id=$adToReorder;";
+			mysql_query($query, $dealhuntingLink) or returnError(902, $query, 'true', $dealhuntingLink);
+		}
+	}
+	
+	returnToMainPage();
+}
+
+function checkAdOrdering($arrIdsAndOrdering)
+{
+	// The next few lines check the top and bottom of the array. The first value should be equal to one,
+	// and the last value should be equal to the number of elements in the array.
+	
+	// We should consider checking each item in the array, because there is a chance that the following
+	// scenario would exist:
+	
+	// array (1, 2, 2, 4)
+	
+	// This array would pass the upper- and lower-bound checks, but still is not ordered correctly.
+	// Is it worth using the processing time to check this every time this script is run?
+
+	// The value of the first element of the array should be '1'
+	if (1 != min($arrIdsAndOrdering))
+	{
+		// The first element does not have a value of '1', so we will need do refactor the ordering
+		refactorAdOrdering($arrIdsAndOrdering);
+	}
+	elseif(max($arrIdsAndOrdering) != count($arrIdsAndOrdering))
+	{
+		refactorAdOrdering($arrIdsAndOrdering);
+	}
+	// else, no need to refactor. The ordering is fine.
+}
+
+function refactorAdOrdering($arrIdsAndOrdering)
+{
+	global $dealhuntingLink;
+	
+	// Create the new ordering values, and update the database.
+	$i=1;
+	foreach ($arrIdsAndOrdering as $key=>$value)
+	{
+		$arrIdsAndOrdering[$key] = $i;
+		$query = "UPDATE " . DEALHUNTING_TOPDEALS_TABLE . " SET ordering = $i WHERE id=$key LIMIT 1;";
+		mysql_query($query, $dealhuntingLink) or returnError(902, $query, 'true', $dealhuntingLink);
+		$i++;
+	}
+}
+function saveChanges()
+{
+	global $dealhuntingLink, $module;
+	
+	$deal_enabled					= intval($_REQUEST['enabled']);
+	$deal_link 						= addslashes(urldecode($_REQUEST['link']));
+	$deal_image 					= addslashes(urldecode($_REQUEST['image']));
+	$deal_impression 			= addslashes(urldecode($_REQUEST['impression']));
+	$deal_alttext 					= addslashes(urldecode($_REQUEST['alttext']));
+	$deal_linktext 					= addslashes($_REQUEST['linktext']);
+	$deal_subtext 					= addslashes($_REQUEST['subtext']);
+	$deal_start_date 				= addslashes($_REQUEST['start_date']);
+	$deal_end_date 				= addslashes($_REQUEST['end_date']);
+	$deal_delete_if_expired 	= intval($_REQUEST['delete_if_expired']);
+	$deal_id 							= intval($_REQUEST['topdealid']);
+	
+	$query = "UPDATE " . DEALHUNTING_TOPDEALS_TABLE . " SET enabled='$deal_enabled', link='$deal_link', image='$deal_image', image_alttext='$deal_alttext', impression_image='$deal_impression', linktext='$deal_linktext', subtext='$deal_subtext', start_date='$deal_start_date', end_date='$deal_end_date', delete_if_expired='$deal_delete_if_expired' WHERE id=$deal_id;";
+	echo $query . "<br />";
+	mysql_query($query, $dealhuntingLink) or returnError(902, $query, 'true', $dealhuntingLink);
+	
+	returnToMainPage();
+}
+
+function saveNewAd()
+{
+	global $dealhuntingLink, $module;
+	
+	$deal_enabled					= intval($_REQUEST['enabled']);
+	$deal_link 						= addslashes(urldecode($_REQUEST['link']));
+	$deal_image 					= addslashes(urldecode($_REQUEST['image']));
+	$deal_impression 			= addslashes(urldecode($_REQUEST['impression']));
+	$deal_alttext 					= addslashes(urldecode($_REQUEST['alttext']));
+	$deal_linktext 					= addslashes($_REQUEST['linktext']);
+	$deal_subtext 					= addslashes($_REQUEST['subtext']);
+	$deal_start_date 				= addslashes($_REQUEST['start_date']);
+	$deal_end_date 				= addslashes($_REQUEST['end_date']);
+	$deal_delete_if_expired 	= intval($_REQUEST['delete_if_expired']);
+	
+	$query = "INSERT INTO " . DEALHUNTING_TOPDEALS_TABLE
+			. " (enabled, link, image, image_alttext, impression_image, linktext, subtext, start_date, end_date, delete_if_expired)"
+			. " VALUES ("
+			. "'$dealEnabled', '$deal_link', '$deal_image', '$deal_alttext', '$deal_impression', '$deal_linktext', '$deal_subtext', '$deal_start_date', '$deal_end_date', '$delete_if_expired'"
+			. ");";
+	mysql_query($query, $dealhuntingLink) or returnError(902, $query, 'true', $dealhuntingLink);
+	
+	returnToMainPage();
+}
+
+function showTable()
+{
+	global $module, $adminLink, $dealhuntingLink;
+
+	// First, a little housekeeping.
+	// We will scan for and remove any ads with the following characteristics:
+	// 1. The expiration date is on or before today's date, and
+	// 2. The 'delete_if_expired' flag is true for that ad
+	$query = "DELETE FROM " . DEALHUNTING_TOPDEALS_TABLE . " WHERE end_date <= CURDATE() AND delete_if_expired=1;";
+	mysql_query($query, $dealhuntingLink) or returnError(902, $query, 'true', $dealhuntingLink);
+	
+	
+	// Get the max 'ordering' value
+	$query = "SELECT MAX(ordering) as max_ordering FROM " . DEALHUNTING_TOPDEALS_TABLE . ";";
+	$max_ordering_result = mysql_query($query, $dealhuntingLink) or die("Query failed: $query. MySQL said: " . mysql_error($dealhuntingLink));
+	$max_ordering_row = mysql_fetch_object($max_ordering_result);
+	$max_ordering = $max_ordering_row->max_ordering;
+	
+	// Get the min 'ordering' value
+	$query = "SELECT MIN(ordering) as min_ordering FROM " . DEALHUNTING_TOPDEALS_TABLE . ";";
+	$min_ordering_result = mysql_query($query, $dealhuntingLink) or die("Query failed: $query. MySQL said: " . mysql_error($dealhuntingLink));
+	$min_ordering_row = mysql_fetch_object($min_ordering_result);
+	$min_ordering = $min_ordering_row->min_ordering;
+	
+	// Get a list of ads to be displayed
+	$query = "SELECT id, enabled, link, image, image_alttext, impression_image, linktext, subtext, start_date, end_date, delete_if_expired, ordering FROM " . DEALHUNTING_TOPDEALS_TABLE . " ORDER BY ordering;";
+	$result = mysql_query($query, $dealhuntingLink) or die("Query failed: $query. MySQL said: " . mysql_error());
+	?>
+
+<div id="topdeals_legend_div">
+	<h3>Legend:</h3>
+	<ul id="legend" style="margin: 0;padding: 0;list-style-type: none;">
+	<li><span class="legend_ad_disabled">Gray Background</span>: Ad is disabled</li>
+	<li><span class="legend_ad_active">Green Text</span>: Ad is displayed</li>
+	<li><span class="legend_ad_expired">Red Text</span>: Ad has expired</li>
+	<li><span class="legend_ad_upcoming">Blue Text</span>: Ad will display in the future</li>
+	</ul>
+</div>
+	
+	<!-- This div contains the delete-confirmation dialog box -->
+	<div id="confirm_delete_div">
+		<div id="confirm_delete_image_div">
+			<img id="ad_img_to_delete" src="" alt="Missing Image" />
+		</div>
+		<div>
+			<h3>Do you wish to delete the ad with ID <span id="ad_id_to_delete_span">&nbsp;</span>?</h3>
+			<input type="button" value="Delete" onclick="deleteAd('<?php echo $_SERVER['PHP_SELF']; ?>', '<?php echo $module; ?>');" />
+			<input type="button" value="Cancel" onclick="hideDeleteDiv();" />
+		</div>
+		<input type="hidden" id="delete_div_ad_id" value="" />
+	</div>
+	
+	<div id="edit_div">
+	<h3 id="edit_div_title">Edit Top Deal</h3>
+	<table>
+		<tr>
+			<td class="detail_cell">
+				<label>Enabled</label>
+				Yes<input type="radio" name="ad_enabled" id="edit_ad_enabled_yes" class="radiobutton" value="1" />
+				No<input type="radio" name="ad_enabled" id="edit_ad_enabled_no" class="radiobutton" value="0" /><br />
+				<label>Link</label>
+				<input type="text" name="link" id="edit_link" value="" /><br />
+				<label>Image</label>
+				<input type="text" name="image" id="edit_image" onblur="updateEditImage(this);" value="" /><br />
+				<label>Hit Tracker</label>
+				<input type="text" name="impression" id="edit_impression" value="" /><br />
+				<label>ALT Text</label>
+				<input type="text" name="alttext" id="edit_alttext" value="" /><br />
+				<label>Link Text</label>
+				<input type="text" name="linktext" id="edit_linktext" value="" /><br />
+				<label>Addt'l Text</label>
+				<input type="text" name="subtext" id="edit_subtext" value="" /><br />
+				<label>Start Date</label>
+				<input type="text" name="dp-normal-1" id="edit_start_date" class="w8em format-y-m-d divider-dash range-low-<?php echo date('Y'); ?>-01-01 range-high-<?php echo date('Y')+2; ?>-12-31 no-transparency" value="" /><br />
+				<label>End Date</label>
+				<input type="text" name="dp-normal-2" id="edit_end_date" class="w8em format-y-m-d divider-dash range-low-<?php echo date('Y'); ?>-01-01 range-high-<?php echo date('Y')+2; ?>-12-31 no-transparency" value="" /><br />
+				<label>Delete When Expired</label>
+				Yes<input type="radio" name="delete_if_expired" id="edit_delete_if_expired_yes" class="radiobutton" value="1" />
+				No<input type="radio" name="delete_if_expired" id="edit_delete_if_expired_no" class="radiobutton" value="0" /><br />
+				<br />
+				<label>&nbsp;</label>
+				<input type="submit" name="submit" class="submitbutton" onclick="submitChanges('<?php echo $_SERVER['PHP_SELF']; ?>');" value="Submit" />
+				<input type="submit" name="cancel" class="submitbutton" onclick="hideEditDiv();" value="Cancel" />
+				<input type="hidden" name="topdeal_id" id="topdeal_id" value="" />
+				<input type="hidden" name="module" id="edit_module" value="<?php echo $module; ?>" />
+				<input type="hidden" name="task" id="edit_task" value="saveChanges" />
+			</td>
+			<td valign="top">
+				<img id="editDivImage" width="95" src="" alt="product image" />
+			</td>
+			<td id="order_select_cell" valign="top">
+				<div id="order_select_div">
+				<?php
+					// Get a list of existing top deals
+					$orderingSelectQuery = "SELECT id, image FROM topdeals_new ORDER BY ordering;";
+					$orderingSelectResult = mysql_query($orderingSelectQuery, $dealhuntingLink) or returnErrro(902, $orderingSelectQuery, 'true', $dealhuntingLink);
+				?>
+					<select id="order_select" size="2">
+						<optgroup label="&nbsp;">
+							<option value="0">First</option>
+						<?php
+						while ($orderingSelectRow=mysql_fetch_object($orderingSelectResult))
+						{
+							?><optgroup label="&nbsp;" style="background-image: url(<?php echo $orderingSelectRow->image; ?>);">
+								<option value="<?php echo $orderingSelectRow->id; ?>"><?php echo $orderingSelectRow->id; ?></option>
+							<?php
+						}
+						?>
+					</select>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+<table style="margin: auto;" class="contentTable">
+<tr class="tr_new_button">
+	<td id="create_new" colspan="5"><input type="button" value="New..." onclick="showNewDiv('<?php echo date('Y-m-d'); ?>');" /></td>
+</tr>
+<tr class="table_titlebar">
+	<td colspan="5">Top Deals Administration</td>
+</tr>
+<tr>
+	<th>Actions</th>
+	<th>Status</th>
+	<th>Image</th>
+	<th colspan="2">Order</th>
+</tr>
+<?php
+
+while ($row = mysql_fetch_object($result))
+{
+	?><tr class="
+	<?php
+	if ($row->enabled == 0)
+	{
+		echo "ad_disabled";
+	}
+	else
+	{
+		echo "ad_enabled";
+	}
+	?>">
+	<td class="action_buttons">
+	<a href="#" onclick="showEditDiv(<?php echo $row->id; ?>, <?php echo $row->enabled; ?>, '<?php echo htmlentities($row->image); ?>', '<?php echo htmlentities($row->link); ?>', '<?php echo htmlentities($row->impression_image); ?>', '<?php echo addslashes($row->image_alttext); ?>', '<?php echo addslashes($row->linktext); ?>', '<?php echo htmlentities($row->subtext); ?>', '<?php echo $row->start_date; ?>', '<?php echo $row->end_date; ?>', <?php echo $row->delete_if_expired; ?>); return false;"><img src="<?php echo ADMIN_PATH; ?>/images/edit.png" alt="Edit" /></a>
+	<a href="#" onclick="confirmDeleteAd(<?php echo $row->id; ?>, '<?php echo htmlentities($row->image); ?>'); return false;"><img src="<?php echo ADMIN_PATH; ?>/images/delete.png" alt="Delete" /></a>
+	</td>
+	<td style="text-align: center;"><?php
+	if ($row->start_date != '0000-00-00' && $row->end_date != '0000-00-00' && $row->start_date >= $row->end_date)
+	{
+		?><span style="color: orange">Date discrepancy.<br /><em>Start date</em> is greater than<br />or equal to <em>end date</em>.</span>
+		<?php
+	}
+	elseif ($row->start_date > date('Y-m-d'))
+	{
+		// The ad is not active yet.
+		?><span style="color: #00ceff;">Start Date:<br /><?php echo $row->start_date; ?></span>
+		<?php
+	}
+	elseif (($row->start_date == '0000-00-00' || $row->start_date <= date('Y-m-d')) && ($row->end_date == '0000-00-00' || $row->end_date > date('Y-m-d')))
+	{
+		// The ad is currently active.
+		?><span style="color: green;">Ad is active</span>
+		<?php
+	}
+	else
+	{
+		// The ad is expired
+		?><span style="color: red;">Expiration Date:<br /><?php echo $row->end_date; ?></span>
+		<?php
+	}
+	?></td>
+	<td class="imagead_cell"><a href="<?php echo htmlentities($row->link); ?>" rel="external"><img alt="<?php echo $row->image_alttext; ?>" src="<?php echo htmlentities($row->image); ?>" /><?php
+	if (!empty($row->impression_image))
+	{
+		echo "<br /><img height=\"1\" width=\"1\" src=\"" . htmlentities($row->impression_image) . "\" alt=\"trackerimage\" />";
+	}
+	if (!empty($row->linktext))
+	{
+		echo "<br />" . $row->linktext;
+	}
+	?></a>
+	<?php 
+	if (!empty($row->subtext))
+	{
+		echo "<br />" . htmlentities($row->subtext);
+	}
+	?></td>
+	<td valign="middle">
+	<?php
+	if ($row->ordering !== $min_ordering)
+	{
+		?><a href="<?php echo $_SERVER['PHP_SELF']; ?>?module=<?php echo $module; ?>&task=reorder&aid=<?php echo $row->id; ?>&orderdir=up&curorder=<?php echo $row->ordering; ?>"><img src="/images/arrowup.gif" alt="Move Up" /></a>
+		<?php
+	}
+	else
+	{
+		echo "&nbsp;";
+	}
+	?></td><td valign="middle">
+	<?php
+	if ($row->ordering !== $max_ordering)
+	{
+		?><a href="<?php echo $_SERVER['PHP_SELF']; ?>?module=<?php echo $module; ?>&task=reorder&aid=<?php echo $row->id; ?>&orderdir=down&curorder=<?php echo $row->ordering; ?>"><img src="/images/arrowdown.gif" alt="Move Down" /></a>
+		<?php
+	}
+	else
+	{
+		echo "&nbsp;";
+	}
+	?>
+	</td>
+	</tr><?php
+}
+?>
+
+</table><?php
+}

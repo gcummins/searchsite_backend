@@ -1,0 +1,11 @@
+#pagecontent table.contentTable form input.textbox
+{
+	border: 1px solid #7f9db9;
+	width: 3em;
+	text-align: center;
+}
+#pagecontent table.contentTable tr:hover td
+{
+	cursor: default;
+	background-color: #fff;
+}

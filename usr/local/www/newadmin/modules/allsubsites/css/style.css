@@ -1,0 +1,66 @@
+#section_topic select
+{
+	float: left;
+}
+#topic_buttons
+{
+	margin-left: 325px;
+}
+#edit_div #topic_buttons input
+{
+	width: 8em;
+}
+span.hidden
+{
+	display: none;
+}
+span.normal
+{
+	color: #000;
+	display: inline;
+}
+span.notice
+{
+	color: green;
+	display: inline;
+}
+span.error
+{
+	color: red;
+	display: inline;
+}
+.wide_action_buttons
+{
+	width: 50px;
+}
+tr.addendum_tr
+{
+	text-align: right;
+}
+.contentTable tr:hover td
+{
+	background-color: #fff;
+}
+td.subsiteMessageHeader
+{
+	font-weight: bold;
+}
+#searchresults_topbar, #searchresults_bottombar
+{
+	border-top: 1px solid #4478d4;
+	background-color: #B4C8F5;
+	padding: 5px;
+}
+#searchresults_bottombar
+{
+	border-top: none;
+	border-bottom: 1px solid #4478d4;
+}
+#searchresults_topbar span#searchresults_summary, #searchresults_bottombar span#searchresults_summary
+{
+	float: right;
+}
+span.additional_text
+{
+	color: #797979;
+}

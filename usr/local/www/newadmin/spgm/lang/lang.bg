@@ -1,0 +1,44 @@
+<?php
+
+# add <meta content="text/html; charset=windows-1251" http-equiv=Content-Type />
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'Галерията е създадена от >SPGM_LINK<';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar'] = 'Страница >CURRENT_PAGE< от >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'филтър';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'нови';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'всички';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Slideshow';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = 'Изображение >CURRENT_PIC< на >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'изображение';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'изображение';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'ново изображение';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = 'нови изображения';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'нова галерия';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Основна галерия';
+
+?>

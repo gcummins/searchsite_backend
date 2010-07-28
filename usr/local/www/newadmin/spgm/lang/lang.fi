@@ -1,0 +1,42 @@
+<?php
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'albumin apuna >SPGM_LINK<';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = 'Sivu >CURRENT_PAGE< / >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'suodatin';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'uudet';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'kaikki';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Slideshow';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = 'Kuva >CURRENT_PIC< / >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'kuva';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'kuvaa';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'uusi kuva';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = 'uudet kuvat';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'uusi kansio';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Albumi';
+
+?>

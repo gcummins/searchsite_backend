@@ -1,0 +1,685 @@
+<?php
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+$task = getTask();
+
+// Determine if a record year was specified. Only events from that year will be loaded
+$eventsFromYear = false;
+if (array_key_exists('year', $_REQUEST) && is_numeric($_REQUEST['year']) && intval($_REQUEST['year']) > 2000)
+{
+	$eventsFromYear = (int)$_REQUEST['year'];
+}
+
+switch ($task)
+{
+	case 'logsByUser':
+		logsByUser();
+		break;
+	case 'logsByDate':
+		logsByDate();
+		break;
+	case 'logsByModule':
+		logsByModule();
+		break;
+	case 'advancedLogSearch';
+		advancedLogSearch();
+		break;
+	case 'submitAdvancedLogSearch';
+		submitAdvancedLogSearch();
+		break;
+	case 'reportGenerator':
+		reportGenerator();
+		break;
+	case 'logMaintenance':
+		logMaintenance();
+		break;
+	default:
+		showTable();
+		break;
+}
+
+function logsByUser()
+{
+	global $adminLink, $module, $moduleName;
+	
+	returnMessage(1000, 'Viewed logs by user', false);
+	?>
+	<h3>Viewing Logs by User</h3>
+	<div id="audit_log_container">
+		<div id="audit_log_detail_container">
+			<div id="audit_log_entries">
+				&nbsp;
+			</div>
+			<div id="audit_log_detail">
+				&nbsp;
+			</div>
+		</div>
+		<div id="audit_log_mainmenu">
+		<?php
+		
+		$orderbyString = "ORDER BY `users`.`username` ASC";
+		
+		// Get a count of all users with log entries
+		$rowCountQuery = "SELECT DISTINCT `user_id`, COUNT(`user_id`) AS `count` FROM `log` GROUP BY `user_id`;";
+		if (false === ($rowCountResult = mysql_query($rowCountQuery, $adminLink)))
+		{
+			returnError(902, $rowCountQuery, true, $adminLink);
+			returnToMainPage();
+			exit();
+		}
+		$rowCount = mysql_num_rows($rowCountResult);
+		
+		// Include the pagination class
+		include "includes/pagination.class.php";
+		
+		$paginator = new Pagination($module, $rowCount);
+		
+		$userQuery = "SELECT"
+			. " DISTINCT `log`.`user_id`, "
+			. " `users`.`username`, `users`.`firstName`, `users`.`lastName`"
+			. " FROM `log`"
+			. " LEFT JOIN `users` on `log`.`user_id`=`users`.`id`"
+			. " WHERE `log`.`user_id` != -1" // Some login attempts use -1 as the userid before the user is authenticated
+			. " $orderbyString;";
+		if (false === ($userResult = mysql_query($userQuery, $adminLink)))
+		{
+			returnError(902, $userQuery, true, $adminLink);
+			returnToMainPage();
+			exit();
+		}
+		
+		// Start the unordered list
+		?><ul>
+		<?php
+		
+		if (!mysql_num_rows($userResult))
+		{
+			?><li>No users have accessed a logged portion of this application.</li>
+			<?php
+		}
+		else
+		{
+			while (false !== ($userRow = mysql_fetch_object($userResult)))
+			{
+				// Display the users as links
+				?><li>
+				<a href="#" onclick="loadLogEntriesByUser(<?php echo $userRow->user_id; ?>, '<?php echo ADMINPANEL_WEB_PATH; ?>', '<?php echo $moduleName; ?>'); return false">
+					<?php echo $userRow->firstName; ?>
+					<?php echo $userRow->lastName; ?>
+					(<?php echo $userRow->username; ?>)
+				</a>
+				</li>
+				<?php
+			}
+		}
+		?></ul>
+		<div style="margin-top: 20px">
+			<input type="checkbox" id="createcsv" value="yes" /><?php echo LANGUAGE_CREATE_CSV_FILE; ?><br />
+		</div>
+		</div>
+	</div>
+	<?php
+}
+
+function logsByDate()
+{
+	global $adminLink, $module, $moduleName;
+	
+	returnMessage(1000, 'Viewed logs by date', false);
+	
+	// Get or set the starting date
+	$startMonth = getMonth('start_month');
+	$daysInTheStartMonth = date('t', mktime(0, 0, 1, $startMonth, 1));
+	$startDay = getDay('start_day', $daysInTheStartMonth);
+	list($startYear, $yearRangeMin, $yearRangeMax) = getYear('start_year');
+
+	// Get or set the ending date
+	$endMonth = getMonth('end_month');
+	$daysInTheEndMonth = date('t', mktime(0, 0, 1, $endMonth, 1));
+	$endDay = getDay('end_day', $daysInTheEndMonth);
+	list($endYear, $yearRangeMin, $yearRangeMax) = getYear('end_year');
+	?>
+	<h3>Viewing Logs by Date</h3>
+		<div id="audit_log_container">
+		<div id="audit_log_detail_container">
+			<div id="audit_log_entries">
+			</div>
+			<div id="audit_log_detail">
+			</div>
+		</div>
+		<div id="audit_log_mainmenu">
+			<div id="al_mainmenu_quicklinks">
+				<h4>Quick Links</h4>
+				<a href="#" onclick="loadLogEntriesByDate('fixed', '<?php echo ADMINPANEL_WEB_PATH; ?>', '<?php echo $moduleName; ?>', 'today'); return false;">Today</a>&nbsp;
+				<a href="#" onclick="loadLogEntriesByDate('fixed', '<?php echo ADMINPANEL_WEB_PATH; ?>', '<?php echo $moduleName; ?>', 'yesterday'); return false;">Yesterday</a>&nbsp;
+				<a href="#" onclick="loadLogEntriesByDate('fixed', '<?php echo ADMINPANEL_WEB_PATH; ?>', '<?php echo $moduleName; ?>', 'pastweek'); return false;">Past seven days</a>
+			</div>
+			<div id="al_mainmenu_daterange">
+				<h4>Select Range</h4>
+				<span>Start Date</span><br />
+				<?php
+				$arrMonths = getMonthArray();
+				echo assembleSelect('start_month', 'start_month', 1, 12, $startMonth, $arrMonths) . "&nbsp;";
+				echo assembleSelect('start_day', 'start_day', 1, $daysInTheStartMonth, $startDay) . "&nbsp;";
+				echo assembleSelect('start_year', 'start_year', $yearRangeMin, $yearRangeMax, $startYear) . "&nbsp;";
+				?><br />
+				<span>End Date</span><br />
+				<?php
+				echo assembleSelect('end_month', 'end_month', 1, 12, $endMonth, $arrMonths) . "&nbsp;";
+				echo assembleSelect('end_day', 'end_day', 1, $daysInTheEndMonth, $endDay) . "&nbsp;";
+				echo assembleSelect('end_year', 'end_year', $yearRangeMin, $yearRangeMax, $endYear) . "&nbsp;";
+				?><br />
+				<div style="margin-top: 20px">
+					<input type="checkbox" id="createcsv" value="yes" /><?php echo LANGUAGE_CREATE_CSV_FILE; ?><br />
+				</div>
+				<input type="button" class="button" value="Submit" onclick="loadLogEntriesByDate('range', '<?php echo ADMINPANEL_WEB_PATH; ?>', '<?php echo $moduleName; ?>'); return false" />
+			</div>
+		</div>
+		</div>
+	<?php
+}
+
+function logsByModule()
+{
+	global $adminLink, $module, $moduleName;
+	
+	returnMessage(1000, 'Viewed logs by module', false);
+	
+	?>
+	<h3>Viewing Logs By Module</h3>
+	<div id="audit_log_container">
+		<div id="audit_log_detail_container">
+			<div id="audit_log_entries">
+			</div>
+			<div id="audit_log_detail">
+			</div>
+		</div>
+		<div id="audit_log_mainmenu">
+		<?php
+		
+		$orderbyString = "ORDER BY `modules`.`display_name` ASC";
+		
+		// Get a count of all modules with log entries
+		$rowCountQuery = "SELECT DISTINCT `module` FROM `log` GROUP BY `module`;";
+		if (false === ($rowCountResult = mysql_query($rowCountQuery, $adminLink)))
+		{
+			returnError(902, $rowCountQuery, true, $adminLink);
+			returnToMainPage();
+			exit();
+		}
+		$rowCount = mysql_num_rows($rowCountResult);
+		
+		// Include the pagination class
+		include "includes/pagination.class.php";
+		
+		$paginator = new Pagination($module, $rowCount);
+		
+		$moduleQuery = "SELECT"
+			. " DISTINCT `log`.`module`, `modules`.`display_name`"
+			. " FROM `log`"
+			. " LEFT JOIN `modules` on `log`.`module`=`modules`.`id`"
+			. " $orderbyString;";
+		if (false === ($moduleResult = mysql_query($moduleQuery, $adminLink)))
+		{
+			returnError(902, $moduleQuery, true, $adminLink);
+			returnToMainPage();
+			exit();
+		}
+		
+		// Start the unordered list
+		?><ul>
+		<?php
+		
+		if (!mysql_num_rows($moduleResult))
+		{
+			?><li>No loggable portions of this application have been accessed.</li>
+			<?php
+		}
+		else
+		{
+			while (false !== ($moduleRow = mysql_fetch_object($moduleResult)))
+			{
+				// Display the modules as links
+				?><li>
+				<a href="#" onclick="loadLogEntriesByModule(<?php echo $moduleRow->module; ?>, '<?php echo ADMINPANEL_WEB_PATH; ?>', '<?php echo $moduleName; ?>'); return false">
+					<?php echo $moduleRow->display_name; ?>
+				</a>
+				</li>
+				<?php
+			}
+		}?></ul>
+		<div style="margin-top: 20px">
+			<input type="checkbox" id="createcsv" value="yes" /><?php echo LANGUAGE_CREATE_CSV_FILE; ?><br />
+		</div>
+		</div>
+	</div>
+	<?php
+}
+
+function advancedLogSearch()
+{
+	global $adminLink, $module, $moduleName;
+	
+	returnMessage(1000, 'Viewed search page', false);
+	
+	// Get or set the starting date
+	$startMonth = getMonth('start_month');
+	$daysInTheStartMonth = date('t', mktime(0, 0, 1, $startMonth, 1));
+	$startDay = getDay('start_day', $daysInTheStartMonth);
+	list($startYear, $yearRangeMin, $yearRangeMax) = getYear('start_year');
+
+	// Get or set the ending date
+	$endMonth = getMonth('end_month');
+	$daysInTheEndMonth = date('t', mktime(0, 0, 1, $endMonth, 1));
+	$endDay = getDay('end_day', $daysInTheEndMonth);
+	list($endYear, $yearRangeMin, $yearRangeMax) = getYear('end_year');
+	
+	?>
+	<h3>Advanced Log Search</h3>
+	<div id="audit_log_container">
+		<div id="audit_log_detail_container">
+			<div id="audit_log_entries">
+			</div>
+			<div id="audit_log_detail">
+			</div>
+		</div>
+		<div id="audit_log_mainmenu">
+			<form name="searchform" onsubmit="loadLogEntriesBySearch('<?php echo ADMINPANEL_WEB_PATH; ?>', '<?php echo $moduleName; ?>'); return false;">
+			<fieldset>
+				<legend>Search Terms</legend>
+				<input type="text" class="fullwidth" id="search_term" class="text"/>
+			</fieldset>
+			<fieldset>
+			<legend>Which Users</legend>
+				<select class="fullwidth" id="search_users" size="4" multiple>
+					<option value="all" selected="selected">All Users</option>
+				<?php
+				// Get a list of all users with log entries
+				$userQuery = "SELECT"
+					. " DISTINCT `user_id`, `users`.`firstName`, `users`.`lastName`, `users`.`username`"
+					. " FROM `log`"
+					. " LEFT JOIN `users` ON `users`.`id`=`user_id`"
+					. " WHERE `user_id` != -1"
+					. " GROUP BY `user_id`"
+					. " ORDER BY `users`.`lastName` ASC;";
+				if (false === ($userResult = mysql_query($userQuery, $adminLink)))
+				{
+					returnError(902, $userQuery, true, $adminLink);
+					returnToMainPage();
+					exit();
+				}
+				while (false !== ($userRow = mysql_fetch_object($userResult)))
+				{
+					?><option value="<?php echo $userRow->user_id; ?>"><?php echo $userRow->firstName . " " . $userRow->lastName . " (" . $userRow->username . ")"; ?></option>
+					<?php
+				}
+				?>
+				</select>
+			</fieldset>
+			<fieldset>
+				<legend>Date Range</legend>
+					<input type="radio" class="radio" name="search_daterange" id="search_daterange" value="all" checked="checked" onclick="toggleDateRangeDisplay('off');" /><span>All</span><br />
+					<input type="radio" class="radio" name="search_daterange" id="search_daterange" value="range" onclick="toggleDateRangeDisplay('on');" /><span>Start Date</span><br />
+					<p>
+						<?php
+						$arrMonths = getMonthArray();
+						echo assembleSelect('start_month', 'start_month', 1, 12, $startMonth, $arrMonths, false) . "&nbsp;";
+						echo assembleSelect('start_day', 'start_day', 1, $daysInTheStartMonth, $startDay, null, false) . "&nbsp;";
+						echo assembleSelect('start_year', 'start_year', $yearRangeMin, $yearRangeMax, $startYear, null, false) . "&nbsp;";
+						?><br />
+						<span>End Date</span><br />
+						<?php
+						echo assembleSelect('end_month', 'end_month', 1, 12, $endMonth, $arrMonths, false) . "&nbsp;";
+						echo assembleSelect('end_day', 'end_day', 1, $daysInTheEndMonth, $endDay, null, false) . "&nbsp;";
+						echo assembleSelect('end_year', 'end_year', $yearRangeMin, $yearRangeMax, $endYear, null, false) . "&nbsp;";
+						?>
+					</p>
+			</fieldset>
+			<fieldset>
+				<legend>Sort By</legend>
+					<input type="radio" class="radio" name="search_sortby" id="search_sortby" value="date" checked="checked"/><span>Date</span><br />
+					<input type="radio" class="radio" name="search_sortby" id="search_sortby" value="user" /><span>User</span><br />
+					<input type="radio" class="radio" name="search_sortby" id="search_sortby" value="module" /><span>Module</span><br />
+			</fieldset>
+			<div style="margin-top: 20px">
+				<input type="checkbox" id="createcsv" value="yes" /><?php echo LANGUAGE_CREATE_CSV_FILE; ?><br />
+			</div>
+			<input type="submit" class="button" value="Submit" />
+			</form>
+		</div>
+	</div>
+	<?php
+}
+
+function reportGenerator()
+{
+	notImplemented('reportGenerator()');
+	return;
+}
+
+function logMaintenance()
+{
+	global $adminLink, $module, $moduleName;
+	
+	returnMessage(1000, 'Viewed log maintenance page', false);
+	
+	// Get or set the starting date
+	$startMonth = getMonth('start_month');
+	$daysInTheStartMonth = date('t', mktime(0, 0, 1, $startMonth, 1));
+	$startDay = getDay('start_day', $daysInTheStartMonth);
+	list($startYear, $yearRangeMin, $yearRangeMax) = getYear('start_year');
+
+	// Get or set the ending date
+	$endMonth = getMonth('end_month');
+	$daysInTheEndMonth = date('t', mktime(0, 0, 1, $endMonth, 1));
+	$endDay = getDay('end_day', $daysInTheEndMonth);
+	list($endYear, $yearRangeMin, $yearRangeMax) = getYear('end_year');
+	
+	?>
+	<h3>Log Maintenance: Select Records to Delete</h3>
+	<div id="audit_log_container">
+		<div id="audit_log_detail_container">
+			<span id="delete_entries"><a href="#" onclick="deleteLogEntries();return false;">Delete these log entries</a></span>
+			<div id="audit_log_entries">
+			</div>
+			<div id="audit_log_detail">
+			</div>
+		</div>
+		<div id="audit_log_mainmenu">
+			<form name="searchform" onsubmit="loadLogEntriesBySearch('<?php echo ADMINPANEL_WEB_PATH; ?>', '<?php echo $moduleName; ?>', true); return false;">
+			<fieldset>
+				<legend>Search Terms</legend>
+				<input type="text" class="fullwidth" id="search_term" class="text"/>
+			</fieldset>
+			<fieldset>
+			<legend>Which Users</legend>
+				<select class="fullwidth" id="search_users" size="4" multiple>
+					<option value="all" selected="selected">All Users</option>
+				<?php
+				// Get a list of all users with log entries
+				$userQuery = "SELECT"
+					. " DISTINCT `user_id`, `users`.`firstName`, `users`.`lastName`, `users`.`username`"
+					. " FROM `log`"
+					. " LEFT JOIN `users` ON `users`.`id`=`user_id`"
+					. " WHERE `user_id` != -1"
+					. " GROUP BY `user_id`"
+					. " ORDER BY `users`.`lastName` ASC;";
+				if (false === ($userResult = mysql_query($userQuery, $adminLink)))
+				{
+					returnError(902, $userQuery, true, $adminLink);
+					returnToMainPage();
+					exit();
+				}
+				while (false !== ($userRow = mysql_fetch_object($userResult)))
+				{
+					?><option value="<?php echo $userRow->user_id; ?>"><?php echo $userRow->firstName . " " . $userRow->lastName . " (" . $userRow->username . ")"; ?></option>
+					<?php
+				}
+				?>
+				</select>
+			</fieldset>
+			<fieldset>
+				<legend>Date Range</legend>
+					<input type="radio" class="radio" name="search_daterange" id="search_daterange" value="all" checked="checked" onclick="toggleDateRangeDisplay('off');" /><span>All</span><br />
+					<input type="radio" class="radio" name="search_daterange" id="search_daterange" value="range" onclick="toggleDateRangeDisplay('on');" /><span>Start Date</span><br />
+					<p>
+						<?php
+						$arrMonths = getMonthArray();
+						echo assembleSelect('start_month', 'start_month', 1, 12, $startMonth, $arrMonths, false) . "&nbsp;";
+						echo assembleSelect('start_day', 'start_day', 1, $daysInTheStartMonth, $startDay, null, false) . "&nbsp;";
+						echo assembleSelect('start_year', 'start_year', $yearRangeMin, $yearRangeMax, $startYear, null, false) . "&nbsp;";
+						?><br />
+						<span>End Date</span><br />
+						<?php
+						echo assembleSelect('end_month', 'end_month', 1, 12, $endMonth, $arrMonths, false) . "&nbsp;";
+						echo assembleSelect('end_day', 'end_day', 1, $daysInTheEndMonth, $endDay, null, false) . "&nbsp;";
+						echo assembleSelect('end_year', 'end_year', $yearRangeMin, $yearRangeMax, $endYear, null, false) . "&nbsp;";
+						?>
+					</p>
+			</fieldset>
+			<input type="submit" class="button" value="Submit" />
+			</form>
+		</div>
+	</div>
+	<?php
+}
+function notImplemented($function)
+{
+	$_SESSION['sysmessage'] = "The function '$function' is a work in progress.";
+	$_SESSION['sysmtype'] = 'info';
+	returnToMainPage();
+}
+
+function showTable()
+{
+	global $module;
+	
+	returnMessage(1000, VIEWED_MAIN_PAGE, false);
+	
+	?>
+	<div class="audit_log_section_container left">
+		<div class="audit_log_section" onclick="openTask('logsByUser', '<?php echo ADMINPANEL_WEB_PATH; ?>', <?php echo $module; ?>);">
+			<span class="div_titlebar">&nbsp;Organized By User</span>
+			<img src="<?php echo ADMINPANEL_WEB_PATH; ?>/images/icons/user.gif" alt="" />
+			<p>Use this type of searching to locate log files organized by user.</p>
+		</div>
+		<div class="audit_log_section" onclick="openTask('logsByDate', '<?php echo ADMINPANEL_WEB_PATH; ?>', <?php echo $module; ?>);">
+			<span class="div_titlebar">&nbsp;Organized By Date</span>
+			<img src="<?php echo ADMINPANEL_WEB_PATH; ?>/images/icons/date.gif" alt="" />
+			<p>Use this type of searching to locate log files by date</p>
+		</div>
+		<div class="audit_log_section" onclick="openTask('logsByModule', '<?php echo ADMINPANEL_WEB_PATH; ?>', <?php echo $module; ?>);">
+			<span class="div_titlebar">&nbsp;Organized By Module</span>
+			<img src="<?php echo ADMINPANEL_WEB_PATH; ?>/images/icons/location.gif" alt="" />
+			<p>Use this type of searching to locate log files by module.</p>
+		</div>
+	</div>
+	<div class="audit_log_section_container right">
+		<div class="audit_log_section" onclick="openTask('advancedLogSearch', '<?php echo ADMINPANEL_WEB_PATH; ?>', <?php echo $module; ?>);">
+			<span class="div_titlebar">&nbsp;Advanced Log Search</span>
+			<img src="<?php echo ADMINPANEL_WEB_PATH; ?>/images/icons/basic.gif" alt="" />
+			<p>Locate log entries matching specific words.</p>
+		</div>
+		<!-- <div class="audit_log_section" onclick="openTask('reportGenerator', '<?php echo ADMINPANEL_WEB_PATH; ?>', <?php echo $module; ?>);">
+			<span class="div_titlebar">&nbsp;Report Generator</span>
+			<img src="<?php echo ADMINPANEL_WEB_PATH; ?>/images/icons/report.gif" alt="" />
+			<p>Use this function to generate reports for printing or saving.</p>
+		</div> -->
+		<div class="audit_log_section" onclick="openTask('logMaintenance', '<?php echo ADMINPANEL_WEB_PATH; ?>', <?php echo $module; ?>);">
+			<span class="div_titlebar">&nbsp;Log File Maintenance</span>
+			<img src="<?php echo ADMINPANEL_WEB_PATH; ?>/images/icons/maint.gif" alt="" />
+			<p>For log file system maintenance use this selection.</p>
+		</div>
+	</div>
+	<?php
+}
+/*
+ * This is the structure that should be used for each type of log viewing
+ * See logsByUser for implementation details
+	<h3>Viewing Logs By User</h3>
+	<div id="audit_log_container">
+		<div id="audit_log_detail_container">
+			<div id="audit_log_entries">
+				<ul>
+					<li><a href="#">Entry 1</a></li>
+					<li><a href="#">Entry 2</a></li>
+					<li><a href="#">Entry 3</a></li>
+					<li><a href="#">Entry 4</a></li>
+				</ul>
+			</div>
+			<div id="audit_log_detail">
+				<p>
+					Name: Joe Smith<br />
+					Username: user1<br />
+					Date: 1/1/2008<br />
+					Task: Companies<br />
+					Action: Deleted company with ID: 9<br />
+				</p>
+			</div>
+		</div>
+		<div id="audit_log_mainmenu">
+			<ul>
+				<li><a href="#">User 1</a></li>
+				<li><a href="#">User 2</a></li>
+				<li><a href="#">User 3</a></li>
+			</ul>
+		</div>
+	</div>
+	*/
+function getMonth($requestField)
+{
+	// Get the requested month, if any. If none was requested, return the current month.
+	if (isset($_REQUEST[$requestField]))
+	{
+		$iStartMonth = (int)$_REQUEST[$requestField];
+		if ($iStartMonth > 0 && $iStartMonth < 13) // Reasonable bounds checks
+		{
+			$startMonth = $iStartMonth;
+		}
+		else
+		{
+			$startMonth = date('n'); // The current month
+		}
+	}
+	else
+	{
+		$startMonth = date('n'); // The current month
+	}
+	return $startMonth;
+}
+
+function getDay($requestField, $daysInTheMonth)
+{
+	if (isset($_REQUEST[$requestField]))
+	{
+		$iStartDay = (int)$_REQUEST[$requestField];
+		if ($iStartDay > 0 && $iStartDay <= $daysInTheMonth) // Reasonable bound check
+		{
+			$startDay = $iStartDay;
+		}
+		else
+		{
+			$startDay = date('j'); // The current day
+		}
+	}
+	else
+	{
+		$startDay = date('j'); // The current day
+	}
+	return $startDay;
+}
+
+function getYear($requestField)
+{
+	global $adminLink;
+	
+	// First, determine the ealiest year for which we have records
+	$query = "SELECT YEAR(`date_time`) as `year` FROM `log` ORDER BY `date_time` ASC LIMIT 1;";
+	if (false === ($result = mysql_query($query, $adminLink)))
+	{
+		returnError(902, $query, true, $adminLink);
+		returnToMainPage();
+		exit();
+	}
+	if (!mysql_num_rows($result))
+	{
+		$yearRangeMin = date('Y'); // The current year
+	}
+	else
+	{
+		$row = mysql_fetch_object($result);
+		$yearRangeMin = (int)$row->year;
+	}
+	
+	// Next, determine the latest year for which we have records
+	$query = "SELECT YEAR(`date_time`) as `year` FROM `log` ORDER BY `date_time` DESC LIMIT 1;";
+	if (false === ($result = mysql_query($query, $adminLink)))
+	{
+		returnError(902, $query, true, $adminLink);
+		returnToMainPage();
+		exit();
+	}
+	if (!mysql_num_rows($result))
+	{
+		$yearRangeMax = date('Y'); // The current year
+	}
+	else
+	{
+		$row = mysql_fetch_object($result);
+		$yearRangeMax = (int)$row->year;
+	}
+	
+	if (isset($_REQUEST[$requestField]))
+	{
+		$iStartYear = (int)$_REQUEST[$requestField];
+		if ($iStartYear >=$yearRangMin && $iStartYear <= $yearRangMax) // Reasonable, if somewhat liberal, bound check
+		{
+			$startYear = $iStartyear;
+		}
+		elseif ($iStartYear >= $yearRangeMin)
+		{
+			$startYear = $yearRangeMax; // Limit the range to the highest year in the logs
+		}
+		elseif ($iStartYear <= $yearRangeMax)
+		{
+			$startYear = $yearRangeMin; // Limit the range to the lowest year in the logs
+		}
+		else
+		{
+			$startYear = date('Y'); // The current year
+		}
+	}
+	else
+	{
+		$startYear = date('Y'); // The current year
+	}
+	return array($startYear, $yearRangeMin, $yearRangeMax);
+}
+
+function assembleSelect($name, $id, $start, $end, $selected, $arrDisplayValues=null, $enabled=true)
+{
+	$output = "<select name=\"$name\" id=\"$id\"";
+	if (!$enabled)
+	{
+		$output .= " disabled=\"disabled\"";
+	}
+	$output .= ">\n";
+	
+	for ($i=$start; $i<=$end; $i++)
+	{
+		$output .= "\t\t\t<option value=\"$i\"";
+		if ($i == $selected)
+		{
+			$output .= " selected=\"selected\"";
+		}
+		if (is_array($arrDisplayValues) && array_key_exists($i, $arrDisplayValues))
+		{
+			$output .= ">" . $arrDisplayValues[$i] . "</option>\n";
+		}
+		else
+		{
+			$output .= ">$i</option>\n";
+		}
+	}
+	$output .= "</select>";
+	
+	return $output;
+}
+function getMonthArray()
+{
+	// Assemble the formatted month names
+	$arrMonths = array();
+
+	for ($i=1; $i<13; $i++)
+	{
+		$arrMonths[$i] = date('M', mktime(0, 0, 1, $i, 1));
+	}
+	
+	return $arrMonths;
+}
+?>

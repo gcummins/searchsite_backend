@@ -1,0 +1,780 @@
+<?php
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+?>
+<?php 
+$task = false;
+if (isset($_REQUEST['task']) && !empty($_REQUEST['task']))
+{
+	$task = $_REQUEST['task'];
+}
+
+switch ($task)
+{
+	case 'modperms':
+		modifyPermissions();
+		//notImplemented();
+		break;
+	case 'savePermissions':
+		savePermissions();
+		break;
+	case 'delete':
+		deleteUser();
+		break;
+	case 'edit':
+		editUser();
+		break;
+	case 'editSave':
+		editSave();
+		break;
+	case 'newUser':
+		newUser();
+		break;
+	case 'newUserSave':
+		newUserSave();
+		break;
+	default:
+		showTable();
+		break;
+}
+
+function notImplemented()
+{
+	global $module, $page;
+	
+	$message = urlencode('This function is not yet implemented.');
+	?><script type="text/javascript" language="Javascript">
+	location.href="<?php echo ADMIN_PATH; ?>/index.php?module=<?php echo $module; ?>&sysmtype=info&sysmessage=<?php echo $message; ?>";
+	</script><?php
+}
+
+function newUser($iusername=false, $ipassword=false, $ifullname=false, $iemailaddress=false, $ilog_activity=false, $ipassword_change_next_logon=false, $ipassword_change_cannot=false, $ipassword_never_expires=false, $iaccount_enabled=false)
+{
+	global $adminLink, $module, $page;
+	
+	?><style type="text/css">
+			#pagecontent table.contentTable form input.text
+			{
+				border: 1px solid #7f9db9;
+				margin-bottom: 4px;
+				background-color: #fafafa;
+			}
+			#pagecontent table.contentTable form label
+			{
+				width: 95px;
+				text-align: left;
+			}
+			</style>
+			<table class="contentTable">
+			<tr class="table_titlebar">
+				<td>Add User</td>
+			</tr>
+			<td>
+			<form action="<?php echo ADMIN_PATH; ?>/index.php" method="post">
+			<label for="username">Username</label>
+			<input type="text" class="text" name="username" value="<?php if ($iusername !== false) echo $iusername; ?>" /><br />
+			<label for="password">Password</label>
+			<input type="text" class="text" name="password" value="<?php if ($ipassword !== false) echo $ipassword; ?>" /><br />
+			<label for="fullName">Name</label>
+			<input type="text" class="text" name="fullName" value ="<?php if ($ifullname !== false) echo $ifullname; ?>" /><br />
+			<label for="emailAddress">Email</label>
+			<input type="text" class="text" name="emailAddress" value="<?php if ($iemailaddress !== false) echo $iemailaddress; ?>" /><br />
+			<input type="checkbox" name="log_activity" <?php if ($ilog_activity !== false) { if ($ilog_activity) { echo "checked=\"checked\""; } } else {echo "checked=\"checked\""; } ?> />Log all account activity<br />
+			<input type="checkbox" name="password_change_next_logon" <?php if ($ipassword_change_next_logon !== false) { if ($ipassword_change_next_logon) { echo "checked=\"checked\""; } } ?> />User must change password at next logon<br />
+			<input type="checkbox" name="password_change_cannot" <?php if ($ipassword_change_cannot !== false) { if ($ipassword_change_cannot) { echo "checked=\"checked\""; } } ?> />User cannot change password<br />
+			<input type="checkbox" name="password_never_expires" <?php if ($ipassword_never_expires !== false) { if ($ipassword_never_expires) { echo "checked=\"checked\""; } } ?> />Password never expires<br />
+			<input type="checkbox" name="account_disabled" <?php if ($iaccount_enabled !== false) { if (!$iaccount_enabled) { echo "checked=\"checked\""; } } ?> />Account is disabled<br />
+			<div style="text-align: center"><input type="submit" value="Create User" /></div>
+			<input type="hidden" name="ak" value="1" />
+			<input type="hidden" name="uid" value="<?php echo $uid; ?>" />
+			<input type="hidden" name="module" value="<?php echo $module; ?>" />
+			<input type="hidden" name="page" value="<?php echo $page; ?>" />
+			<input type="hidden" name="task" value="newUserSave" />
+			</form></td>
+			</tr>
+			</table>
+		<?php
+}
+
+function newUserSave()
+{
+	global $adminLink, $module, $page;
+	
+	// Gather the form fields
+	$isError = false;
+	$arrErrorMessages = array();
+	if (array_key_exists('username', $_REQUEST) && !empty($_REQUEST['username']))
+	{
+		$username = $_REQUEST['username'];
+	}
+	else
+	{
+		$username = null;
+		$isError = true;
+		$arrErrorMessages[] = 'Username is required.<br />';
+	}
+	
+	if (array_key_exists('password', $_REQUEST) && !empty($_REQUEST['password']))
+	{
+		$password = $_REQUEST['password'];
+		
+		if (!checkPasswordComplexity($password))
+		{
+			$isError = true;
+			$arrErrorMessages[] = 'Password does not meet minimum complexity requirements.';
+		}
+	}
+	else
+	{
+		$password = null;
+		$isError = true;
+		$arrErrorMessages[] = 'Password is required.';
+	}
+	
+	if (array_key_exists('fullName', $_REQUEST) && !empty($_REQUEST['fullName']))
+	{
+		$fullName = $_REQUEST['fullName'];
+	}
+	else
+	{
+		$fullName = null;
+		$isError = true;
+		$arrErrorMessages[] = 'Name is required.';
+	}
+	
+	if (array_key_exists('emailAddress', $_REQUEST) && !empty($_REQUEST['emailAddress']))
+	{
+		$emailAddress = $_REQUEST['emailAddress'];
+	}
+	else
+	{
+		$emailAddress = null;
+		$isError = true;
+		$arrErrorMessages[] = 'Email address is required.';
+	}
+	
+	if (array_key_exists('log_activity', $_REQUEST) && !empty($_REQUEST['log_activity']))
+	{
+		if (strtolower($_REQUEST['log_activity']) == 'on')
+		{
+			$log_activity = 1;
+		}
+		else
+		{
+			$log_activity = 0;
+		}
+	}
+	else
+	{
+		$log_activity = 0;
+	}
+	
+	if (array_key_exists('password_change_next_logon', $_REQUEST) && !empty($_REQUEST['password_change_next_logon']))
+	{
+		if (strtolower($_REQUEST['password_change_next_logon']) == 'on')
+		{
+			$password_change_next_logon = 1;
+		}
+		else
+		{
+			$password_change_next_logon = 0;
+		}
+	}
+	else
+	{
+		$password_change_next_logon = 0;
+	}
+	
+	if (array_key_exists('password_never_expires', $_REQUEST) && !empty($_REQUEST['password_never_expires']))
+	{
+		if (strtolower($_REQUEST['password_never_expires']) == 'on')
+		{
+			$password_never_expires = 1;
+		}
+		else
+		{
+			$password_never_expires = 0;
+		}
+	}
+	else
+	{
+		$password_never_expires = 0;
+	}
+	
+	if (array_key_exists('password_change_cannot', $_REQUEST) && !empty($_REQUEST['password_change_cannot']))
+	{
+		if (strtolower($_REQUEST['password_change_cannot']) == 'on')
+		{
+			$password_change_cannot = 1;
+		}
+		else
+		{
+			$password_change_cannot = 0;
+		}
+	}
+	else
+	{
+		$password_change_cannot = 0;
+	}
+	
+	if (array_key_exists('account_disabled', $_REQUEST) && !empty($_REQUEST['account_disabled']))
+	{
+		if (strtolower($_REQUEST['account_disabled']) == 'on')
+		{
+			$account_enabled = 0;
+		}
+		else
+		{
+			$account_enabled = 1;
+		}
+	}
+	else
+	{
+		$account_enabled = 1;
+	}
+	
+	if ($isError)
+	{
+		// Assemble the error message string
+		$errorMessageString = "<ul>";
+		foreach ($arrErrorMessages as $errorMessage)
+		{
+			$errorMessageString .= "<li>$errorMessage</li>";
+		}
+		$errorMessageString .= "</ul>";
+		returnError(200, $errorMessageString);
+		
+		newUser($username, $password, $fullName, $emailAddress, $log_activity, $password_change_next_logon, $password_change_cannot, $password_never_expires, $account_enabled);
+	}
+	else
+	{
+		// Create a query to insert the data into the database
+		$query = "INSERT INTO users (username, password, fullName, emailAddress, log_activity, password_change_next_logon, password_change_cannot, password_never_expires, enabled) VALUES ('$username', MD5('$password'), '$fullName', '$emailAddress', $log_activity, $password_change_next_logon, $password_change_cannot, $password_never_expires, $account_enabled);";
+		if (!mysql_query($query, $adminLink))
+		{
+			returnError(902, $query, true, $adminLink);
+			newUser($username, $password, $fullName, $emailAddress, $log_activity, $password_change_next_logon, $password_change_cannot, $password_never_expires, $account_enabled);
+		}
+		else
+		{
+			logNotice('New User Created', 'New UID: ' . mysql_insert_id($adminLink), '', $module);
+			
+			$_SESSION['sysmessage'] = 'User was successfully created.';
+			$_SESSION['sysmtype'] = 'info';
+			showTable();
+		}
+	}
+}
+
+function checkPasswordComplexity($password)
+{
+	// This function needs to determine if password-complexity checking is required
+	// by global policy, and if so, check the supplied password againts the rules.
+	
+	// This is just a stub for now, and always returns true
+	return true;
+}
+
+function savePermissions()
+{
+	global $adminLink, $module, $page;
+	
+	// Determine the userId and username of the user we are modifying
+	if (array_key_exists('uid', $_REQUEST) && !empty($_REQUEST['uid']))
+	{
+		$uid = $_REQUEST['uid'];
+		
+		$arrAllowedSections = array();
+		$arrAllowedModules = array();
+		// Show all of the POSTed elements
+		foreach ($_POST as $field=>$value)
+		{
+			if ($value == 'on')
+			{
+				if (substr($field, 0, 8) == 'section_')
+				{
+					$arrAllowedSections[] = substr($field, 8);
+				}
+				elseif (substr($field, 0, 7) == 'module_')
+				{
+					$arrAllowedModules[] = substr($field, 7);
+				}
+			}
+		}
+		
+		// Remove all existing entries from the tables for this user:
+		$query = "DELETE FROM users_allowed_modules WHERE user_id=$uid;";
+		mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+		$query = "DELETE FROM users_allowed_sections WHERE user_id=$uid;";
+		mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+		
+		// Prepare to insert the module permission entries
+		$query = "INSERT INTO users_allowed_modules (user_id, module_id) VALUES ";
+		foreach ($arrAllowedModules as $moduleId)
+		{
+			$query .= "($uid, $moduleId), ";
+		}
+		
+		$query = substr($query, 0, -2) . ";";
+		if (count($arrAllowedModules)) // Only attempt the insert if we have data to insert
+		{
+			mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+		}
+		
+		// Prepare to insert the section permission entries
+		$query = "INSERT INTO users_allowed_sections (user_id, section_id) VALUES ";
+		foreach ($arrAllowedSections as $sectionId)
+		{
+			$query .= "($uid, $sectionId), ";
+		}
+		
+		$query = substr($query, 0, -2) . ";";
+		
+		if (count($arrAllowedSections))
+		{
+			mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+		}
+		
+		logNotice('Account Permissions Modified', 'UID: ' . $uid, '', $module);
+		$_SESSION['sysmessage'] = "Permssions have been successfully updated.";
+		$_SESSION['sysmtype'] = 'info';
+		
+		showTable();
+	}
+	else
+	{
+		returnError(103, 'User ID must be provided', true);
+	}
+	
+}
+function modifyPermissions()
+{
+	global $adminLink, $module, $page;
+	
+	// Determine the userId and username of the user we are modifying
+	if (array_key_exists('uid', $_REQUEST) && !empty($_REQUEST['uid']))
+	{
+		$uid = $_REQUEST['uid'];
+		
+		$query = "SELECT username FROM users WHERE id=$uid LIMIT 1;";
+		$userResult = mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+			
+		if (!mysql_num_rows($userResult))
+		{
+			returnError(103, 'User Not Found', true);
+		}
+		else
+		{
+			$row = mysql_fetch_object($userResult);
+			$username = $row->username;
+			
+			// Get a list of modules for which this user has access
+			$query = "SELECT module_id FROM users_allowed_modules WHERE user_id = $uid;";
+			$allowedModulesResult = mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+			$arrAllowedModules = array();
+			while ($row = mysql_fetch_object($allowedModulesResult))
+			{
+				$arrAllowedModules[] = $row->module_id;
+			}
+			
+			// Get a list of menu sections for which this user has access
+			$query = "SELECT section_id FROM users_allowed_sections WHERE user_id=$uid;";
+			$allowedSectionsResult = mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+			$arrAllowedSections = array();
+			while ($row = mysql_fetch_object($allowedSectionsResult))
+			{
+				$arrAllowedSections[] = $row->section_id;
+			}
+			
+			// Get a list of all available modules
+			$query = "SELECT id, display_name, menu_section FROM modules ORDER BY menu_section ASC, `order` ASC;";
+			//$result = mysql_query($query, $adminLink) or handle_error($query, true, 'mysql', $adminLink);
+			$modulesResult = mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+			
+			// Also get a list of the available menu sections
+			$query = "SELECT id, display_name FROM menu_sections ORDER BY `order`;";
+			$menuSectionsResult = mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+			
+			$arrSections = array();
+			$arrSectionTitles = array();
+			while ($row = mysql_fetch_object($menuSectionsResult))
+			{
+				$arrSectionTitles[$row->id] = $row->display_name;
+				$arrSections[$row->id] = array();
+			}
+			
+			$arrModulesTitles = array();
+			while ($row = mysql_fetch_object($modulesResult))
+			{
+				$arrModulesTitles[$row->id] = $row->display_name;
+				$arrSections[$row->menu_section][] = $row->id;
+			}
+			?>
+			<table class="contentTable">
+			<tr class="table_titlebar">
+				<td>Modify Permissions for '<?php echo $username; ?>'</td>
+			</tr>
+			<td>
+			<form action="<?php echo ADMIN_PATH; ?>/index.php" method="post">
+			<?php
+			foreach ($arrSectionTitles as $sectionId=>$sectionTitle)
+			{
+				?><input type="checkbox" name="section_<?php echo $sectionId; ?>" <?php if (in_array($sectionId, $arrAllowedSections)) echo 'checked=\"checked\"'; ?> /><b><?php echo $sectionTitle; ?></b><br />
+				<?php
+				foreach ($arrSections[$sectionId] as $moduleId)
+				{
+					?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" name="module_<?php echo $moduleId; ?>" <?php if (in_array($moduleId, $arrAllowedModules)) echo 'checked=\"checked\"'; ?> /><?php echo $arrModulesTitles[$moduleId]; ?><br />
+					<?php
+				}
+			}
+			?><div style="text-align: center"><input type="submit" value="Submit" /></div>
+			<input type="hidden" name="ak" value="1" />
+			<input type="hidden" name="uid" value="<?php echo $uid; ?>" />
+			<input type="hidden" name="module" value="<?php echo $module; ?>" />
+			<input type="hidden" name="page" value="<?php echo $page; ?>" />
+			<input type="hidden" name="task" value="savePermissions" />
+			</form></td>
+			</tr>
+			</table>
+			<?php
+		}
+	}
+	else
+	{
+		returnError(103, 'User ID must be provided', true);
+	}
+}
+
+function deleteUser()
+{
+	global $adminLink, $module, $page;
+	
+	if (array_key_exists('uid', $_REQUEST) && !empty($_REQUEST['uid']))
+	{
+		$uid = $_REQUEST['uid'];
+		
+		// First, delete any entries in the permission tables
+		$query = "DELETE FROM users_allowed_sections WHERE user_id=$uid;";
+		mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+		
+		$query = "DELETE FROM users_allowed_modules WHERE user_id=$uid;";
+		mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+		
+		// Next, delete the user from the users table
+		$query = "DELETE FROM users WHERE id=$uid;";
+		mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+		
+		if (mysql_affected_rows($adminLink))
+		{
+			logNotice('User Deleted', 'UID: ' . $uid, '', $module);
+			$_SESSION['sysmessage'] = "The user has been successfully deleted.";
+			$_SESSION['sysmtype'] = 'info';
+		}
+		else
+		{
+			$_SESSION['sysmessage'] = "The requested user does not exist.";
+			$_SESSION['sysmtype'] = 'error';
+		}
+		
+		showTable();
+	}
+	else
+	{
+		returnError(103, 'User ID must be provided', true);
+	}
+}
+
+function editSave()
+{
+	global $adminLink, $module, $page;
+	
+	if (array_key_exists('uid', $_REQUEST) && !empty($_REQUEST['uid']))
+	{
+		$uid = $_REQUEST['uid'];
+		
+		if (array_key_exists('password', $_REQUEST) && !empty($_REQUEST['password']))
+		{
+			if ($_REQUEST['password'] != '' && $_REQUEST['password'] != '[hidden]')
+			{
+				$password = $_REQUEST['password'];
+			}
+			else
+			{
+				$password = false;
+			}
+		}
+		else
+		{
+			returnError(200, 'Must provide a password');
+		}
+		if (array_key_exists('fullName', $_REQUEST) && !empty($_REQUEST['fullName']))
+		{
+			$fullName = $_REQUEST['fullName'];
+		}
+		else
+		{
+			returnError(200, 'Must provide a name');
+		}
+		if (array_key_exists('emailAddress', $_REQUEST) && !empty($_REQUEST['emailAddress']))
+		{
+			$emailAddress = $_REQUEST['emailAddress'];
+		}
+		else
+		{
+			$emailAddress = '';
+		}
+		
+		if (array_key_exists('log_activity', $_REQUEST) && !empty($_REQUEST['log_activity']))
+		{
+			if ($_REQUEST['log_activity'] == 'on')
+			{
+				$log_activity = 1;
+			}
+			else
+			{
+				$log_activity = 0;
+			}
+		}
+		else
+		{
+			$log_activity = 0;
+		}
+		
+		if (array_key_exists('password_change_next_logon', $_REQUEST) && !empty($_REQUEST['password_change_next_logon']))
+		{
+			if ($_REQUEST['password_change_next_logon'] == 'on')
+			{
+				$password_change_next_logon = 1;
+			}
+			else
+			{
+				$password_change_next_logon = 0;
+			}
+		}
+		else
+		{
+			$password_change_next_logon = 0;
+		}
+		
+		if (array_key_exists('password_change_cannot', $_REQUEST) && !empty($_REQUEST['password_change_cannot']))
+		{
+			if ($_REQUEST['password_change_cannot'] == 'on')
+			{
+				$password_change_cannot = 1;
+			}
+			else
+			{
+				$password_change_cannot = 0;
+			}
+		}
+		else
+		{
+			$password_change_cannot = 0;
+		}
+		
+		if (array_key_exists('password_never_expires', $_REQUEST) && !empty($_REQUEST['password_never_expires']))
+		{
+			if ($_REQUEST['password_never_expires'] == 'on')
+			{
+				$password_never_expires = 1;
+			}
+			else
+			{
+				$password_never_expires = 0;
+			}
+		}
+		else
+		{
+			$password_never_expires = 0;
+		}
+		
+		if (array_key_exists('account_locked', $_REQUEST) && !empty($_REQUEST['account_locked']))
+		{
+			if ($_REQUEST['account_locked'] == 'on')
+			{
+				$account_locked = 1;
+			}
+			else
+			{
+				$account_locked = 0;
+			}
+		}
+		else
+		{
+			$account_locked = 0;
+		}
+		
+		if (array_key_exists('account_disabled', $_REQUEST) && !empty($_REQUEST['account_disabled']))
+		{
+			if ($_REQUEST['account_disabled'] == 'on')
+			{
+				$account_enabled = 0;
+			}
+			else
+			{
+				$account_enabled = 1;
+			}
+		}
+		else
+		{
+			$account_enabled = 1;
+		}
+		
+		// Prepare a query to insert the data into the database
+		$query = "UPDATE users SET ";
+		
+		if ($password !== false)
+		{
+			$query .= "`password` = MD5('$password'), ";
+		}
+		$query .= "
+			`fullName`									= '$fullName',
+			`emailAddress`							= '$emailAddress',
+			`log_activity`								= $log_activity,
+			`password_change_next_logon`	= $password_change_next_logon,
+			`password_change_cannot`		= $password_change_cannot,
+			`password_never_expires`			= $password_never_expires,
+			`account_locked`							= $account_locked";
+			
+		if ($account_enabled !== false)
+		{
+			$query .= ", `enabled` = $account_enabled";
+		}
+		$query .= " WHERE id=$uid;";
+		
+		// Run the query
+		if (!mysql_query($query, $adminLink))
+		{
+			returnError(902, $query, true, $adminLink);
+		}
+		else
+		{
+			logNotice('User Account Modified', 'UID: ' . $uid, '', $module);
+			$_SESSION['sysmessage'] = "The user has been successfully updated.";
+			$_SESSION['sysmtype'] = 'info';
+		}
+		
+		showTable();
+		
+	}
+	else
+	{
+		returnError(103, 'User ID must be provided', true);
+	}
+}
+
+function editUser()
+{
+	global $adminLink, $module, $page;	
+	
+	if (array_key_exists('uid', $_REQUEST) && !empty($_REQUEST['uid']))
+	{
+		$uid = $_REQUEST['uid'];
+	
+		// Load detailed user information
+		$query = "SELECT username, fullName, emailAddress, enabled, log_activity, password_change_next_logon, password_change_cannot, password_never_expires, account_locked FROM `users` WHERE id=$uid LIMIT 1;";
+		$result = mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+		
+		if (!mysql_num_rows($result))
+		{
+			returnError(103, 'User Not Found', true);
+		}
+		else
+		{
+			$row = mysql_fetch_object($result);
+		?>
+			<style type="text/css">
+			#pagecontent table.contentTable form input.text
+			{
+				border: 1px solid #7f9db9;
+				margin-bottom: 4px;
+				background-color: #fafafa;
+			}
+			#pagecontent table.contentTable form label
+			{
+				width: 95px;
+				text-align: left;
+			}
+			</style>
+			<table class="contentTable">
+			<tr class="table_titlebar">
+				<td>Edit User '<?php echo $row->username; ?>'</td>
+			</tr>
+			<td>
+			<form action="<?php echo ADMIN_PATH; ?>/index.php" method="post">
+			<label for="password">Password</label>
+			<input type="text" class="text" name="password" value="[hidden]" /><br />
+			<label for="fullName">Name</label>
+			<input type="text" class="text" name="fullName" value="<?php echo $row->fullName; ?>" /><br />
+			<label for="emailAddress">Email</label>
+			<input type="text" class="text" name="emailAddress" value="<?php echo $row->emailAddress; ?>" /><br />
+			<input type="checkbox" name="log_activity" <?php if ($row->log_activity) echo 'checked=\"checked\"'; ?> />Log all account activity<br />
+			<input type="checkbox" name="password_change_next_logon" <?php if ($row->password_change_next_logon) echo 'checked=\"checked\"'; ?> />User must change password at next logon<br />
+			<input type="checkbox" name="password_change_cannot" <?php if ($row->password_change_cannot) echo 'checked=\"checked\"'; ?> />User cannot change password<br />
+			<input type="checkbox" name="password_never_expires" <?php if ($row->password_never_expires) echo 'checked=\"checked\"'; ?> />Password never expires<br />
+			<input type="checkbox" name="account_disabled" <?php if (!$row->enabled) echo 'checked=\"checked\"'; ?> />Account is disabled<br />
+			<input type="checkbox" name="account_locked" <?php if ($row->account_locked) echo 'checked=\"checked\"'; ?> />Account is locked out<br />
+			<div style="text-align: center"><input type="submit" value="Submit" /></div>
+			<input type="hidden" name="ak" value="1" />
+			<input type="hidden" name="uid" value="<?php echo $uid; ?>" />
+			<input type="hidden" name="module" value="<?php echo $module; ?>" />
+			<input type="hidden" name="page" value="<?php echo $page; ?>" />
+			<input type="hidden" name="task" value="editSave" />
+			</form></td>
+			</tr>
+			</table>
+		<?php
+		}
+	}
+	else
+	{
+		returnError(103, 'User ID must be provided', true);
+	}
+}
+
+function showTable()
+{
+	global $adminLink, $module;
+	
+	// Load user information
+	$query = "SELECT id, username, fullName, emailAddress, enabled FROM `users` ORDER BY id ASC;";
+	$result = mysql_query($query, $adminLink) or handle_error($query, true, 'mysql', $adminLink);
+	
+	$userCount = mysql_num_rows($result);
+	
+	// Start the table output
+	?><table class="contentTable">
+	<tr class="table_titlebar">
+		<td colspan=7><span class="title_link"><a href="<?php echo ADMIN_PATH; ?>/index.php?ak=1&module=<?php echo $module; ?>&task=newUser">Add</a></span>User Manager <span class="title_detail">- <?php echo $userCount; ?> Users Accounts</span></td>
+	</tr>
+	<tr>
+		<th>ID</th>
+		<th>Username</th>
+		<th>Full Name</th>
+		<th>Email</th>
+		<th>Permissions</th>
+		<th>Status</th>
+		<th>Action</th>
+	</tr><?php
+	while ($row = mysql_fetch_object($result))
+	{
+		?><tr>
+			<td><?php echo $row->id; ?></td>
+			<td><?php echo $row->username; ?></td>
+			<td><?php echo $row->fullName; ?></td>
+			<td><?php echo $row->emailAddress; ?></td>
+			<td align="center"><a href="<?php echo ADMIN_PATH; ?>/index.php?ak=1&module=<?php echo $module; ?>&task=modperms&uid=<?php echo $row->id; ?>">Modify...</a></td>
+			<td align="center"><a href="javascript:changeStatus(<?php echo $row->id; ?>, <?php echo $row->enabled; ?>, '<?php echo ADMIN_PATH; ?>', <?php echo $module; ?>);"><?php echo ($row->enabled) ? 'Enabled' : 'Disabled'; ?></a></td>
+			<td align="center"><a href="<?php echo ADMIN_PATH; ?>/index.php?ak=1&module=<?php echo $module; ?>&task=edit&uid=<?php echo $row->id; ?>">Edit</a> | <a href="javascript:confirmDelete(<?php echo $row->id; ?>, '<?php echo $row->username; ?>', '<?php echo ADMIN_PATH; ?>', <?php echo $module; ?>);">Delete</a></td>
+		</tr><?php
+	}
+	?>
+	</table><?php
+}
+
+?>

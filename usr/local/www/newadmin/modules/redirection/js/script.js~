@@ -1,0 +1,94 @@
+function loadSortOrder(theSelect, serverPath, module)
+{
+	location.href = serverPath + '/?module=' + module + '&sortby='+theSelect.value;
+}
+function showEditDiv(redirection_id,redirection_description,redirection_url)
+{
+	betterInnerHtml(document.getElementById('edit_div_title'), 'Edit Redirection', true);
+	document.getElementById('redirection_description').value	= redirection_description;
+	document.getElementById('redirection_url').value			= redirection_url;
+	document.getElementById('redirection_id').value				= redirection_id;
+	document.getElementById('redirection_task').value			= 'saveEdit';
+	document.getElementById('edit_div').style.display			= 'block';
+	
+	document.getElementById('redirection_description').focus();
+}
+function showNewDiv()
+{
+	betterInnerHtml(document.getElementById('edit_div_title'), 'New Redirection', true);
+	document.getElementById('redirection_description').value	= '';
+	document.getElementById('redirection_url').value			= '';
+	document.getElementById('redirection_task').value			= 'saveNew';
+	document.getElementById('edit_div').style.display			= 'block';
+	
+	document.getElementById('redirection_description').focus();
+}
+function hideEditDiv()
+{
+	document.getElementById('redirection_task').value = '';
+	document.getElementById('edit_div').style.display = 'none';
+}
+function showRedirectionDeleteConfirmDiv(redirection_id, redirection_description, serverPath)
+{
+	//document.getElementById('confirmdelete_description').innerHTML		= redirection_description;
+	betterInnerHtml(document.getElementById('confirmdelete_id'), redirection_id, true);
+	betterInnerHtml(document.getElementById('confirmdelete_description'), redirection_description, true);
+	//document.getElementById('confirmdelete_id').innerHTML					= redirection_id;
+	document.getElementById('redirection_confirmdelete_id').value		= redirection_id;
+	
+	// Show the "Confirm Delete" div
+	document.getElementById('confirmdelete_div').style.display	= 'block';
+}
+function hideConfirmDelete(clearData)
+{
+	if (clearData == true)
+	{
+		document.getElementById('confirmdelete_description').value	= '';
+		document.getElementById('confirmdelete_id').value				= '';
+	}
+
+	document.getElementById('confirmdelete_div').style.display	= 'none';
+}
+function submitConfirmDelete(serverPath, module)
+{
+	// Gather the form fields
+	redirection_id			= document.getElementById('redirection_confirmdelete_id').value;
+	redirection_task		= 'deleteRedir';
+	spage						= document.getElementById('spage').value;
+	rpp						= document.getElementById('rpp').value;
+	sortby					= document.getElementById('sortby').value;
+	//module					= document.getElementById('module').value;
+	
+	targetLocation			= serverPath + '?module=' + module + '&task=' + redirection_task + '&rpp=' + rpp + '&spage=' + spage + '&sortby=' + sortby + '&redirectionid=' + redirection_id;
+	document.location		= targetLocation;
+	
+}
+function submitChanges(serverPath)
+{
+	// Gather the form fields
+	redirection_id					= document.getElementById('redirection_id').value;
+	redirection_description		= document.getElementById('redirection_description').value;
+	redirection_url				= document.getElementById('redirection_url').value;
+	redirection_task				= document.getElementById('redirection_task').value;
+	spage								= document.getElementById('spage').value;
+	rpp								= document.getElementById('rpp').value;
+	sortby							= document.getElementById('sortby').value;
+	module							= document.getElementById('module').value;
+	
+	// Determine if this is a new redirection or an edit of an existing one.
+	if (redirection_task == 'saveNew')
+	{
+		// Save the redirection as new
+	}
+	else if (redirection_task == 'saveEdit')
+	{
+		// Update the existing redirection
+	}
+	else
+	{
+		alert("No task was specified, so it is unclear whether this is a new redirection or an edit of an existing redirection. Please contact an administrator.");
+	}
+	
+	targetLocation					= serverPath + '?module=' + module + '&task=' + redirection_task + '&rpp=' + rpp + '&spage=' + spage + '&sortby=' + sortby + '&redirectionid=' + redirection_id + '&description=' + redirection_description + '&redirurl=' + escape(redirection_url);
+	document.location				= targetLocation;
+}

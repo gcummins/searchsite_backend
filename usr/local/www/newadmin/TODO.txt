@@ -1,0 +1,35 @@
+Items To Do for DealHunting
+
+### "Add new" function for Redirection module
+### "Add new" function for Categories module
+*** "Add new" function for Companies module
+    Image Gallery: Show multiple images per page (configurable) with edit/delete controls.
+    Coupon Administration
+    Daily Deal Administration
+    Daily Notes Administration
+### Remove the query echo at the top of the "Search Terms" module.
+### Complete the "Redirection Edit" function
+### Complete the "Redirection Delete" function
+    Modify the "Companies" edit form to match the "Top Deals" (and others) edit form
+    Create an alternate, image-free, link-only menubar for the application. Consider making the entire application skinnable.
+       This may be useful because the original design requirement was provided over three years ago, and the interface is no longer
+       on par with current standards.
+### Set focus on the 'username' field when loading the login.php page.
+    Check the dialog handling in the Rediration module. Problem:
+      - Click "Edit" for one of the redirections
+      - Click "Cancel"
+      - Click "New". The "New" dialog appears, but contains the contents of the previous "Edit" dialog.
+    Update the "Top Deals" table to match the look and feel of Categories/redirection/etc.
+    Add a cancel button to the user "edit" function in the User Manager.
+    (optional) Modify the edit function to match the dialog used in other modules.
+### Complete the "Edit" function for the Categories module
+    Categories Module: When a category banner expires, it should be replaced by a default banner.
+    Categories Module: The Top Deal expiration date is for a banner that shows at the top of the right column.
+       Once it expires it should not show on the site.
+    Categories Modules: "stores" link. This link should allow the admin to select which stores are joined to a category.
+    
+
+
+(Items marked with '***' are in progress.)
+(Items marked with '###' have been completed.)
+

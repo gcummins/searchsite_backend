@@ -1,0 +1,44 @@
+<?php
+#Don't forget rewrite line 7 of index.php
+#<meta http-equiv="Content-Type" content="text/html; charset=windows-1257">
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'Bilžu albūms uztaisīts ar >SPGM_LINK<';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = 'Lappuse >CURRENT_PAGE< no >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'filtrs';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'jaunas bildes';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'visas bildes';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Skatīt bilžu slaidšovu';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = 'Bilde >CURRENT_PIC< no >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'bilde';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'bildes';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'jauna bilde';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = 'jaunas bildes';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'Jauns bilžu albūms';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Galvenais bilžu albūms';
+
+?>

@@ -1,0 +1,406 @@
+<?php
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+$task = getTask();
+
+switch ($task)
+{
+	case 'saveEdit':
+		gatherFormFields('edit');
+		break;
+	case 'deleteSubmit':
+		deleteSubmit();
+		break;
+	case 'saveNew':
+		gatherFormFields('new');
+		break;
+	default:
+		showTable();
+		break;
+}
+
+function deleteSubmit()
+{
+	global $dealhuntingDatabase, $module;
+	
+	if (!isPermitted('delete', $module))
+	{
+		returnError(301, LANGUAGE_ERROR_OPERATION_NOT_PERMITTED, false);
+		returnToMainPage(getStartPage());
+		return 0;
+	}
+	
+	if (!isset($_GET['dealid']) || (int)$_GET['dealid'] < 1)
+	{
+		returnError(201, "A Deal ID must be provided.", false);
+		returnToMainPage(getStartPage());
+		return 0;
+	}
+	else
+	{
+		$id = (int)$_GET['dealid'];
+		
+		$dealhuntingDatabase->query("DELETE FROM " . DEALHUNTING_DAILYDEALS_TABLE . " WHERE `id`=$id LIMIT 1;");
+		
+		returnMessage(1101, sprintf(LANGUAGE_DELETE_OBJECT_ID, 'daily deal', $id), false);
+		returnToMainPage(getStartPage());
+		return 0;
+	}
+}
+
+function gatherFormFields($submitType)
+{
+	// This function will gather and sanitize the form fields,
+	// then pass the data to the appropriate function for
+	// editing or insertion.
+	
+	$arrFields = array(); // To hold the sanitized values
+	
+	// Field: ID
+	if (isset($_POST['dealid']))
+	{
+		$id = (int)$_POST['dealid'];
+	}
+	else
+	{
+		$submitType = 'new';	// Even if this was submitted as an edit, if no dealid was provided, create a new record.
+	}
+	
+	// Field: company
+	if (isset($_POST['edit_company']))
+	{
+		$arrFields['store'] = intval($_POST['edit_company']);
+	}
+	else
+	{
+		$arrFields['store'] = null;
+	}
+	
+	// Field: dealurl
+	if (isset($_POST['edit_dealurl']))
+	{
+		$arrFields['dealurl'] = mysql_real_escape_string($_POST['edit_dealurl']);
+	}
+	else
+	{
+		$arrFields['dealurl'] = '';
+	}
+
+	// Field: img
+	if (isset($_POST['edit_image']))
+	{
+		$arrFields['img'] = mysql_real_escape_string($_POST['edit_image']);
+	}
+	else
+	{
+		$arrFields['img'] = '';
+	}
+
+	// Field: imgurl
+	if (isset($_POST['edit_imageurl']))
+	{
+		$arrFields['imgurl'] = mysql_real_escape_string($_POST['edit_imageurl']);
+	}
+	else
+	{
+		$arrFields['imgurl'] = '';
+	}
+
+	// Field: showdate
+	if (isset($_POST['edit_show_date']))
+	{
+		$arrFields['showdate'] = mysql_real_escape_string($_POST['edit_show_date']);
+	}
+	else
+	{
+		$arrFields['showdate'] = date('Y-m-d H:i:s');
+	}
+
+	// Field: expire
+	if (isset($_POST['edit_expiration_date']))
+	{
+		$arrFields['expire'] = mysql_real_escape_string($_POST['edit_expiration_date']);
+	}
+	else
+	{
+		$arrFields['expire'] = null;
+	}
+
+	// Field: valid
+	if (isset($_POST['edit_valid']))
+	{
+		$arrFields['valid'] = intval($_POST['edit_valid']);
+	}
+	else
+	{
+		$arrFields['valid'] = 1;
+	}
+	
+	// Field: invalidreason
+	if (isset($_POST['edit_invalidreason']))
+	{
+		$arrFields['invalidreason'] = mysql_real_escape_string($_POST['edit_invalidreason']);
+	}
+	else
+	{
+		$arrFields['invalidreason'] = '';
+	}
+	
+	// Field: subject
+	if (isset($_POST['edit_subject']))
+	{
+		$arrFields['subject'] = mysql_real_escape_string($_POST['edit_subject']);
+	}
+	else
+	{
+		$arrFields['subject'] = '';
+	}
+	
+	// Field: brief
+	if (isset($_POST['edit_brief']))
+	{
+		$arrFields['brief'] = mysql_real_escape_string($_POST['edit_brief']);
+		$arrFields['verbose'] = mysql_real_escape_string($_POST['edit_brief']);
+	}
+	else
+	{
+		$arrFields['brief'] = '';
+		$arrFields['verbose'] = '';
+	}
+
+	// Field: updated
+	$arrFields['updated']		= date('Y-m-d H:i:s');
+	$arrFields['whoupdated']	= $_SESSION['firstname'];
+	
+	if ($submitType == 'edit')
+	{
+		saveEdit($arrFields, $id);
+	}
+	else
+	{
+		saveNew($arrFields);
+	}
+}
+
+function saveNew($arrFields)
+{
+	global $dealhuntingDatabase, $module;
+	
+	if (!isPermitted('create', $module))
+	{
+		returnError(301, LANGUAGE_ERROR_OPERATION_NOT_PERMITTED, false);
+		returnToMainPage();
+		return 0;
+	}
+	
+	// Generate the MySQL insert query
+	$query = "INSERT INTO " . DEALHUNTING_DAILYDEALS_TABLE
+		. " (`store`, `dealurl`, `img`, `imgurl`, `showdate`, `posted`, `whoposted`,"
+		. " `updated`, `whoupdated`,"
+		. " `expire`, `valid`, `invalidreason`, `subject`, `brief`, `verbose`) VALUES ("
+		. " '" . $arrFields['store']			. "',"
+		. " '" . $arrFields['dealurl']			. "',"
+		. " '" . $arrFields['img']				. "',"
+		. " '" . $arrFields['imgurl']			. "',"
+		. " '" . $arrFields['showdate']			. "',"
+		. " '" . date('Y-m-d H:i:s')			. "',"
+		. " '" . $_SESSION['firstname']			. "',"
+		. " '" . date('Y-m-d H:i:s')			. "',"
+		. " '" . $_SESSION['firstname']			. "',"
+		. " '" . $arrFields['expire']			. "',"
+		. " "  . $arrFields['valid']			. ","
+		. " '" . $arrFields['invalidreason']	. "',"
+		. " '" . $arrFields['subject']			. "',"
+		. " '" . $arrFields['brief']			. "',"
+		. " '" . $arrFields['verbose']			. "'"
+		. ");";
+	
+	$dealhuntingDatabase->query($query);
+	
+	returnMessage(1002, sprintf(LANGUAGE_CREATE_OBJECT_NAME, 'daily deal', $arrFields['subject']), false);
+	returnToMainPage(getStartPage());
+	return;
+}
+
+function saveEdit($arrFields, $id)
+{
+	global $dealhuntingDatabase, $module;
+	
+	if (!isPermitted('edit', $module))
+	{
+		returnError(301, LANGUAGE_ERROR_OPERATION_NOT_PERMITTED, false);
+		returnToMainPage();
+		return;
+	}
+	
+	// Generate the MySQL update query
+	$query = "UPDATE " . DEALHUNTING_DAILYDEALS_TABLE . " SET"
+		. " `store`='" . $arrFields['store'] . "',"
+		. " `dealurl`='" . $arrFields['dealurl'] . "',"
+		. " `img`='" . $arrFields['img'] . "',"
+		. " `imgurl`='" . $arrFields['imgurl'] . "',"
+		. " `showdate`='" . $arrFields['showdate'] . "',"
+		. " `updated`='" . date('Y-m-d H:i:s') . "',"
+		. " `whoupdated`='" . $_SESSION['firstname'] . "',"
+		. " `expire`='" . $arrFields['expire'] . "',"
+		. " `valid`=" . $arrFields['valid'] . ","
+		. " `invalidreason`='" . $arrFields['invalidreason'] . "',"
+		. " `subject`='" . $arrFields['subject'] . "',"
+		. " `brief`='" . $arrFields['brief'] . "',"
+		. " `verbose`='" . $arrFields['verbose'] . "'"
+		. " WHERE `id`=$id LIMIT 1;";
+	
+	$dealhuntingDatabase->query($query);
+
+	returnMessage(1001, sprintf(LANGUAGE_MODIFY_OBJECT_NAME, 'daily deal', $arrFields['subject']), false);
+	returnToMainPage(getStartPage());
+	exit();
+}
+
+function showTable()
+{
+	global $dealhuntingDatabase, $module, $moduleName;
+	
+	returnMessage(1000, LANGUAGE_VIEWED_MAIN_PAGE, false);
+	
+	// Create the legend
+	include "modules/includes/legend.class.php";
+	$legend = new Legend(array(
+		array('good','Good'),
+		array('waiting','Upcoming'),
+		array('invalid','Invalid'),
+		array('expired','Expired')
+	));
+	echo $legend->create();
+
+	if (isset($_REQUEST['paging_orderby']) && !empty($_REQUEST['paging_orderby']))
+	{
+		switch ($_REQUEST['paging_orderby'])
+		{
+			case 'clicks':
+				$orderbyString = "ORDER BY `clicks` DESC";
+				break;
+			default:
+				$orderbyString = "ORDER BY showdate DESC";
+				break;
+		}
+	}
+	else
+	{
+		$orderbyString = "ORDER BY showdate DESC";
+	}
+	
+	// Get a count of all available daily deals
+	$dealhuntingDatabase->query("SELECT COUNT(`id`) as `count` FROM `" . DEALHUNTING_DAILYDEALS_TABLE . "`;");
+	$rowCount = $dealhuntingDatabase->firstField();
+	
+	// Include the pagination class
+	include "includes/pagination.class.php";
+	
+	$paginator = new Pagination($module, $rowCount);
+	
+	$query = "SELECT"
+		. "`id`, `store`, `showdate`, `verbose`, `brief`, `subject`, `valid`, `clicks`, `expire`"
+		. " FROM " . DEALHUNTING_DAILYDEALS_TABLE
+		. " $orderbyString " . $paginator->getLimitString();
+	
+	$dealhuntingDatabase->query($query);
+	
+	// Include the table-creation class
+	include_once "includes/pageContentTable.class.php";
+	
+	foreach ($dealhuntingDatabase->objects() as $row)
+	{
+		$actionButtons = false;
+		if (isPermitted('edit', $module))
+		{
+			$actionButtons .= "<a href=\"#\" onclick=\"showEditDiv(" . $row->id . ", '" . ADMINPANEL_WEB_PATH . "', '$moduleName', '" . $_SERVER['PHP_SELF'] . "', $module);\"><img src=\"" .  ADMINPANEL_WEB_PATH . "/images/edit.png\" alt=\"Edit\" /></a>";
+		}
+		if (isPermitted('delete', $module))
+		{
+			$actionButtons .= "<a href=\"#\" onclick=\"confirmDealDelete('" . $row->subject . "', " . $row->id . ", '" . ADMINPANEL_WEB_PATH . "', '$module');\"><img src=\"" . ADMINPANEL_WEB_PATH. "/images/delete.png\" alt=\"Delete\" /></a>";
+		}
+		$rowModifier = "";
+		if (!empty($row->expire) && (time() > strtotime($row->expire)))
+		{
+			$rowModifier = "class=\"legend_expired\"";
+		}
+		elseif ($row->valid != null && (1 != intval($row->valid)))
+		{
+			$rowModifier = "class=\"legend_invalid\"";
+		}
+		elseif (!empty($row->showdate) && (time() <= strtotime($row->showdate)))
+		{
+			$rowModifier = "class=\"legend_waiting\"";
+		}
+		if (!empty($actionButtons))
+		{
+			$arrListOfColumns = array('Action', 'Subject', 'Clicks');
+			$arrDataRows[] = array($rowModifier, array(
+				array("class=\"action_buttons\"", $actionButtons),
+				array('', htmlspecialchars($row->subject)),
+				array('', intval($row->clicks))
+			));
+		}
+		else
+		{
+			$arrListOfColumns = array('Subject', 'Clicks');
+			$arrDataRows[] = array($rowModifier, array(
+				array('', htmlspecialchars($row->subject)),
+				array('', intval($row->clicks))
+			));
+		}
+	}
+	
+	// Set the table action
+	if (isPermitted('create', $module))
+	{
+		$action = "showNewDiv('" . ADMINPANEL_WEB_PATH . "', '" . $moduleName . "', '" . $_SERVER['PHP_SELF'] . "', " . $module . ");";
+	}
+	else
+	{
+		$action = '';
+	}
+	
+	// Create the select control
+	$selectControlString  = "<div class=\"orderby_div\">";
+	$selectControlString .= "\nSort By: <select name=\"paging_orderby\" onchange=\"loadSortOrder(this, '" . ADMINPANEL_WEB_PATH . "', " . $module . ");\">\n";
+	$selectControlString .= "\t<option value=\"date\"";
+	if ($paginator->orderby == "date")
+	{
+		$selectControlString .= " selected=\"selected\"";
+	}
+	$selectControlString .= ">Date</option>\n";
+	
+	$selectControlString .= "\t<option value=\"clicks\"";
+	if ($paginator->orderby == "clicks")
+	{
+		$selectControlString .= " selected=\"selected\"";
+	}
+	$selectControlString .= ">Clicks</option>\n";
+	$selectControlString .= "</select></div>";
+	
+	// Create an array to hold the "addendum" to the table
+	$arrAddendum = array(
+		$selectControlString,
+		$paginator->generateLinkBar()
+	);
+	
+	// Create the table
+	$theTable = new pageContentTable('Daily Deals Administration', $arrListOfColumns, 'Create Daily Deal', $action, $arrDataRows, $arrAddendum);
+	
+	if ($theTable->error())
+	{
+		returnError(301, $theTable->error(), true);
+	}
+	else
+	{
+		echo $theTable->createTable();
+	}
+}
+?>

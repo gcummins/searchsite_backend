@@ -1,0 +1,44 @@
+<?php
+
+# add <meta http-equiv='content-type' content='text/html; charset=windows-1250'>
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'Galéria bola vytvorená pomocou >SPGM_LINK<';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = 'Strana >CURRENT_PAGE< z >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'filter';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'nové';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'všetky';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'prehliadka';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = 'Obrázok >CURRENT_PIC< z >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'obrázok';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'obrázky/ov';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'nový obrázok';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = 'nové obrázky';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'nová galéria';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Hlavná galéria';
+
+?>

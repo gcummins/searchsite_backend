@@ -1,0 +1,46 @@
+﻿<?php
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'Gallery được tạo bởi >SPGM_LINK<';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = 'trang >CURRENT_PAGE< của >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'bộ lọc';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'mới';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'tất cả';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Trình chiếu';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = 'Tranh >CURRENT_PIC< của >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'tranh';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'tranh';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'tranh mới';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = 'những tranh mới';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'bộ sưu tập mới';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Bộ sưu tập chính';
+
+# Title for EXIF data screen
+$spgm_cfg['locale']['exifHeading'] = 'EXIF data for';
+
+?>
+

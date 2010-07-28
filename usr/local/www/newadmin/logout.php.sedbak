@@ -1,0 +1,28 @@
+<?php
+
+define ('APP_NAME', 'DH_Admin');
+
+session_start();
+
+// Include the configuration settings
+include_once "configuration.php";
+
+if (array_key_exists('userid', $_SESSION) && !empty($_SESSION['userid']))
+{
+	// Include the logging functions
+	include_once "includes/log.php";
+
+	// Connect to the database server
+	include_once "includes/connect.php";
+
+	// Remove the authorization key from the database
+	$query = "UPDATE `users` SET authkey='' WHERE id=" . $_SESSION['userid'] . ";";
+	mysql_query($query, $adminLink) or die(mysql_error($adminLink));
+}
+
+session_destroy();
+
+header("Location: " . ADMIN_PATH . "/login.php");
+exit();
+
+?>

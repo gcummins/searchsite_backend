@@ -1,0 +1,79 @@
+table.contentTable td#companies_createnew
+{
+	text-align: right;
+	border: none;
+	background-color: #ece9d8;
+}
+table.contentTable tr:hover td#companies_createnew
+{
+	background-color: #ece9d8;
+	cursor: default;
+}
+#edit_div table td.detail_cell label
+{
+	display: block;
+	width: 155px;
+	float: left;
+	text-align: right;
+	padding-right: 10px;
+}
+#edit_div table td.detail_cell input, #edit_div table td.detail_cell select, #edit_div table td.detail_cell textarea
+{
+	margin: 0px 5px 10px 0px;
+	width: 150px;
+}
+#edit_div table td.detail_cell input.inputbutton
+{
+	width: auto;
+}
+#edit_div table td.detail_cell input.checkbox
+{
+	width: 13px;
+}
+#section_general, #section_url, #section_coupons, #section_shipping
+{
+}
+#section_container div.showIt
+{
+	display: block;
+}
+#section_container div.hideIt
+{
+	display: none;
+}
+#section_container div.greeny
+{
+	color: green;
+}
+#section_container
+{
+	width: 100%;
+	border: 1px solid #fff;
+	padding: 15px 0 15px 0;
+	margin-bottom: 10px;
+	background-color: #e0e0e0;
+}
+ul#edit_div_navigation
+{
+	list-style: none;
+	padding: 0px;
+	margin: 0px 0px 2px 0px;
+}
+
+ul#edit_div_navigation li
+{
+	display: inline;
+	border: 1px solid #fff;
+	padding: 2px 5px;
+}
+ul#edit_div_navigation li.section_inactive
+{
+	font-weight: normal;
+	background-color: #b1b1b1;
+}
+ul#edit_div_navigation li.section_active
+{
+	font-weight: bold;
+	background-color: #e0e0e0;
+	border-bottom: 1px solid #e0e0e0;
+}

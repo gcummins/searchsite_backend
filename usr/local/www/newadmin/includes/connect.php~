@@ -1,0 +1,29 @@
+<?php
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+// Connect to the dealhunting database
+if (!$dealhuntingLink = @mysql_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD))
+{
+	die("Unable to connect to the database server. MySQL said: <p><b>&nbsp;" . mysql_error() . "</b></p>Please check the configuration file (configuration.php) to verify that the connection settings are correct.");
+}
+if (!@mysql_select_db(DEALHUNTING_DB_NAME, $dealhuntingLink))
+{
+	die("<p>Unable to connect to the database <em>'dealhunting'</em>.</p><p> Please check the configuration file (configuration.php) to verify that the database name is correct, and that the database user has appropriate privileges to this database.</p>");
+}
+
+// Connect to the administrative database
+if (!$adminLink = @mysql_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD))
+{
+	die("Unable to connect to the database server. MySQL said: <p><b>&nbsp;" . mysql_error() . "</b></p>Please check the configuration file (configuration.php) to verify that the connection settings are correct.");
+}
+if (!@mysql_select_db(DB_NAME, $adminLink))
+{
+	die("<p>Unable to connect to the database <em>'" . DB_NAME . "'</em>.</p><p> Please check the configuration file (configuration.php) to verify that the database name is correct, and that the database user has appropriate privileges to this database.</p>");
+}
+
+?>

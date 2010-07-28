@@ -1,0 +1,199 @@
+Dec 14 12:05:27 CommandProxy: Deleting stale PID file.
+Dec 14 12:23:47 CommandProxy: Deleting stale PID file.
+Dec 14 12:24:07 CommandProxy: Input received!
+Dec 14 12:24:07 CommandProxy: Beginning startProcess().
+Dec 14 12:24:07 CommandProxy: Sending 'FIN' notification.
+Dec 14 12:25:19 CommandProxy: Deleting stale PID file.
+Dec 14 12:25:40 CommandProxy: Input received!
+Dec 14 12:25:40 CommandProxy: Beginning startProcess().
+Dec 14 12:25:40 CommandProxy: Executing the command '/usr/local/etc/rc.d/dataloader.sh start'.
+Dec 14 12:27:34 CommandProxy: Deleting stale PID file.
+Dec 14 12:27:50 CommandProxy: Deleting stale PID file.
+Dec 14 12:27:51 CommandProxy: Deleting stale PID file.
+Dec 14 12:27:51 CommandProxy: Deleting stale PID file.
+Dec 14 12:27:52 CommandProxy: Deleting stale PID file.
+Dec 14 12:27:52 CommandProxy: Deleting stale PID file.
+Dec 14 12:27:53 CommandProxy: Deleting stale PID file.
+Dec 14 12:27:53 CommandProxy: Deleting stale PID file.
+Dec 14 12:27:53 CommandProxy: Deleting stale PID file.
+Dec 14 12:28:05 CommandProxy: Deleting stale PID file.
+Dec 14 12:28:06 CommandProxy: Deleting stale PID file.
+Dec 14 12:28:06 CommandProxy: Deleting stale PID file.
+Dec 14 12:28:06 CommandProxy: Deleting stale PID file.
+Dec 14 12:28:07 CommandProxy: Deleting stale PID file.
+Dec 14 12:28:08 CommandProxy: Deleting stale PID file.
+Dec 14 12:28:08 CommandProxy: Deleting stale PID file.
+Dec 14 12:28:09 CommandProxy: Deleting stale PID file.
+Dec 14 12:28:21 CommandProxy: Deleting stale PID file.
+Dec 14 12:28:34 CommandProxy: Deleting stale PID file.
+Dec 14 12:28:59 CommandProxy: Deleting stale PID file.
+Dec 14 12:29:06 CommandProxy: Deleting stale PID file.
+Dec 14 12:33:54 CommandProxy: Deleting stale PID file.
+Dec 14 12:35:34 CommandProxy: Deleting stale PID file.
+Dec 14 12:35:55 CommandProxy: Deleting stale PID file.
+Dec 14 12:38:07 CommandProxy: Deleting stale PID file.
+Dec 14 12:38:16 CommandProxy: Deleting stale PID file.
+Dec 14 12:42:48 CommandProxy: Deleting stale PID file.
+Dec 14 12:44:27 CommandProxy: Deleting stale PID file.
+Dec 14 12:59:50 CommandProxy: Deleting stale PID file.
+Dec 14 13:05:10 CommandProxy: Input received!
+Dec 14 13:05:10 CommandProxy: Beginning killProcess().
+Dec 14 13:05:10 CommandProxy: Executing the command '/bin/kill -SIGTERM 32644'.
+Dec 14 13:05:10 CommandProxy: Command execution finished.
+Dec 14 13:05:10 CommandProxy: Sending 'FIN' notification.
+Dec 14 13:07:21 CommandProxy: Input received!
+Dec 14 13:07:21 CommandProxy: Beginning startProcess().
+Dec 14 13:07:21 CommandProxy: Executing the command '/usr/local/etc/rc.d/dataloader.sh start'.
+Dec 14 13:36:44 CommandProxy: Deleting stale PID file.
+Dec 14 13:43:19 CommandProxy: Deleting stale PID file.
+Dec 14 13:45:35 CommandProxy: Deleting stale PID file.
+Dec 14 13:46:51 CommandProxy: Deleting stale PID file.
+Dec 14 14:30:21 CommandProxy: Input received!
+Dec 14 14:30:21 CommandProxy: Beginning killProcess().
+Dec 14 14:30:21 CommandProxy: Executing the command '/bin/kill -SIGTERM 33116'.
+Dec 14 14:30:21 CommandProxy: Command execution finished.
+Dec 14 14:30:21 CommandProxy: Sending 'FIN' notification.
+Dec 14 14:30:29 CommandProxy: Input received!
+Dec 14 14:30:29 CommandProxy: Beginning startProcess().
+Dec 14 14:30:29 CommandProxy: Executing the command '/usr/local/etc/rc.d/dataloader.sh start'.
+Dec 14 15:17:29 CommandProxy: Deleting stale PID file.
+Dec 14 15:18:21 CommandProxy: Input received!
+Dec 14 15:18:21 CommandProxy: Received QUIT, closing child socket.
+Dec 14 15:18:25 CommandProxy: Input received!
+Dec 14 15:18:25 CommandProxy: Deleting PID file...
+Dec 14 15:18:50 CommandProxy: Input received!
+Dec 14 15:18:50 CommandProxy: Beginning startProcess().
+Dec 14 15:18:50 CommandProxy: Executing the command '/usr/local/etc/rc.d/dataloader.sh start'.
+Dec 14 15:21:31 CommandProxy: ResponseCount: 2
+Dec 14 15:21:31 CommandProxy: Command execution finished.
+Dec 14 15:21:31 CommandProxy: Sending 'FIN' notification.
+Dec 14 15:23:53 CommandProxy: Deleting stale PID file.
+Dec 14 15:24:13 CommandProxy: Input received!
+Dec 14 15:24:13 CommandProxy: Beginning startProcess().
+Dec 14 15:24:13 CommandProxy: Executing the command '/usr/local/etc/rc.d/dataloader.sh start'.
+Dec 14 15:42:38 CommandProxy: Deleting stale PID file.
+Dec 14 15:44:58 CommandProxy: Deleting stale PID file.
+Dec 14 15:46:58 CommandProxy: Input received!
+Dec 14 15:46:58 CommandProxy: Beginning killProcess().
+Dec 14 15:46:58 CommandProxy: Executing the command '/bin/kill -SIGTERM 34456'.
+Dec 14 15:46:58 CommandProxy: Command execution finished.
+Dec 14 15:46:58 CommandProxy: Sending 'FIN' notification.
+Dec 14 15:47:10 CommandProxy: Input received!
+Dec 14 15:47:10 CommandProxy: Beginning startProcess().
+Dec 14 15:47:10 CommandProxy: Executing the command '/usr/local/etc/rc.d/dataloader.sh start'.
+Dec 14 15:48:58 CommandProxy: ResponseCount: 2
+Dec 14 15:48:58 CommandProxy: Command execution finished.
+Dec 14 15:48:58 CommandProxy: Sending 'FIN' notification.
+Dec 14 15:52:09 CommandProxy: Deleting stale PID file.
+Dec 14 15:58:27 CommandProxy: Deleting stale PID file.
+Dec 14 15:58:41 CommandProxy: Input received!
+Dec 14 15:58:41 CommandProxy: Received QUIT, closing child socket.
+Dec 14 15:58:59 CommandProxy: Input received!
+Dec 14 15:58:59 CommandProxy: Beginning startProcess().
+Dec 14 15:58:59 CommandProxy: Executing the command '/usr/local/bin/php /home/development/datafeeds/dataloader-3.1.php start'.
+Dec 14 16:08:05 CommandProxy: ResponseCount: 1
+Dec 14 16:08:05 CommandProxy: Command execution finished.
+Dec 14 16:08:05 CommandProxy: Sending 'FIN' notification.
+Dec 14 16:08:49 CommandProxy: Input received!
+Dec 14 16:08:49 CommandProxy: Received QUIT, closing child socket.
+Dec 14 16:08:52 CommandProxy: Input received!
+Dec 14 16:08:52 CommandProxy: Deleting PID file...
+Dec 14 16:09:34 CommandProxy: Input received!
+Dec 14 16:09:34 CommandProxy: Received QUIT, closing child socket.
+Dec 14 16:09:45 CommandProxy: Input received!
+Dec 14 16:09:45 CommandProxy: Beginning startProcess().
+Dec 14 16:09:45 CommandProxy: Executing the command '/usr/local/bin/php /home/development/datafeeds/dataloader-3.1.php > /dev/null'.
+Dec 14 16:09:45 CommandProxy: Command execution finished.
+Dec 14 16:09:45 CommandProxy: Sending 'FIN' notification.
+Dec 14 16:10:02 CommandProxy: Input received!
+Dec 14 16:10:02 CommandProxy: Beginning killProcess().
+Dec 14 16:10:02 CommandProxy: Executing the command '/bin/kill -SIGTERM 34693'.
+Dec 14 16:10:02 CommandProxy: Command execution finished.
+Dec 14 16:10:02 CommandProxy: Sending 'FIN' notification.
+Dec 14 16:10:15 CommandProxy: Input received!
+Dec 14 16:10:15 CommandProxy: Beginning startProcess().
+Dec 14 16:10:15 CommandProxy: Executing the command '/usr/local/bin/php /home/development/datafeeds/dataloader-3.1.php > /dev/null'.
+Dec 14 16:10:15 CommandProxy: Command execution finished.
+Dec 14 16:10:15 CommandProxy: Sending 'FIN' notification.
+Dec 14 16:41:08 CommandProxy: Input received!
+Dec 14 16:41:08 CommandProxy: Deleting PID file...
+Dec 14 16:41:12 CommandProxy: Deleting stale PID file.
+Dec 14 16:41:12 CommandProxy: Deleting stale PID file.
+Dec 14 16:41:13 CommandProxy: Deleting stale PID file.
+Dec 14 16:41:14 CommandProxy: Deleting stale PID file.
+Dec 14 16:41:15 CommandProxy: Deleting stale PID file.
+Dec 14 16:41:15 CommandProxy: Deleting stale PID file.
+Dec 14 16:41:15 CommandProxy: Deleting stale PID file.
+Dec 14 16:41:55 CommandProxy: Deleting stale PID file.
+Dec 14 16:42:21 CommandProxy: Deleting stale PID file.
+Dec 14 16:42:50 CommandProxy: Input received!
+Dec 14 16:42:50 CommandProxy: Beginning startProcess().
+Dec 14 16:42:50 CommandProxy: Executing the command '/usr/local/bin/php /home/development/datafeeds/dataloader-3.1.php > /dev/null'.
+Dec 14 16:42:50 CommandProxy: Command execution finished.
+Dec 14 16:42:50 CommandProxy: Sending 'FIN' notification.
+Dec 14 16:42:56 CommandProxy: Input received!
+Dec 14 16:42:56 CommandProxy: Beginning killProcess().
+Dec 14 16:42:56 CommandProxy: Executing the command '/bin/kill -SIGTERM 34974'.
+Dec 14 16:42:56 CommandProxy: Command execution finished.
+Dec 14 16:42:56 CommandProxy: Sending 'FIN' notification.
+Dec 14 16:43:03 CommandProxy: Input received!
+Dec 14 16:43:03 CommandProxy: Beginning startProcess().
+Dec 14 16:43:03 CommandProxy: Executing the command '/usr/local/bin/php /home/development/datafeeds/dataloader-3.1.php > /dev/null'.
+Dec 14 16:43:03 CommandProxy: Command execution finished.
+Dec 14 16:43:03 CommandProxy: Sending 'FIN' notification.
+Dec 17 17:50:36 CommandProxy: Deleting stale PID file.
+Dec 27 09:04:25 CommandProxy: Deleting stale PID file.
+Jan 07 08:24:52 CommandProxy: Process found at , but it isn't this script.
+Jan 07 08:24:52 CommandProxy: Deleting stale PID file
+Jan 09 08:08:24 CommandProxy: Process found at , but it isn't this script.
+Jan 09 08:08:24 CommandProxy: Deleting stale PID file
+Jan 14 08:21:51 CommandProxy: Process found at , but it isn't this script.
+Jan 14 08:21:51 CommandProxy: Deleting stale PID file
+Jan 15 13:29:50 CommandProxy: Process found at , but it isn't this script.
+Jan 15 13:29:50 CommandProxy: Deleting stale PID file
+Jan 16 09:16:21 CommandProxy: Deleting stale PID file.
+Jan 17 10:36:10 CommandProxy: Deleting stale PID file.
+Jan 17 10:44:50 CommandProxy: Process found at , but it isn't this script.
+Jan 17 10:44:50 CommandProxy: Deleting stale PID file
+Jan 22 08:22:55 CommandProxy: Deleting stale PID file.
+Jan 31 08:24:26 CommandProxy: Process found at , but it isn't this script.
+Jan 31 08:24:26 CommandProxy: Deleting stale PID file
+Feb 04 07:56:59 CommandProxy: Process found at , but it isn't this script.
+Feb 04 07:56:59 CommandProxy: Deleting stale PID file
+Feb 15 14:15:28 CommandProxy: Process found at , but it isn't this script.
+Feb 15 14:15:28 CommandProxy: Deleting stale PID file
+Feb 18 08:08:09 CommandProxy: Deleting stale PID file.
+Feb 20 10:37:13 CommandProxy: Deleting stale PID file.
+Feb 25 08:56:32 CommandProxy: Process found at , but it isn't this script.
+Feb 25 08:56:32 CommandProxy: Deleting stale PID file
+Mar 03 08:15:31 CommandProxy: Deleting stale PID file.
+Mar 09 21:48:06 CommandProxy: Deleting stale PID file.
+Mar 09 21:58:48 CommandProxy: Deleting stale PID file.
+Mar 09 22:56:38 CommandProxy: Process found at , but it isn't this script.
+Mar 09 22:56:38 CommandProxy: Deleting stale PID file
+Mar 10 07:28:59 CommandProxy: Process found at , but it isn't this script.
+Mar 10 07:28:59 CommandProxy: Deleting stale PID file
+Mar 10 07:31:08 CommandProxy: Process found at , but it isn't this script.
+Mar 10 07:31:08 CommandProxy: Deleting stale PID file
+Mar 10 11:34:36 CommandProxy: Process found at , but it isn't this script.
+Mar 10 11:34:36 CommandProxy: Deleting stale PID file
+Mar 17 07:09:29 CommandProxy: Process found at , but it isn't this script.
+Mar 17 07:09:29 CommandProxy: Deleting stale PID file
+Mar 26 07:12:53 CommandProxy: Process found at , but it isn't this script.
+Mar 26 07:12:53 CommandProxy: Deleting stale PID file
+Apr 07 14:58:05 CommandProxy: Process found at , but it isn't this script.
+Apr 07 14:58:05 CommandProxy: Deleting stale PID file
+Apr 07 15:52:31 CommandProxy: Deleting stale PID file.
+Apr 07 15:53:13 CommandProxy: Deleting stale PID file.
+Apr 07 15:53:39 CommandProxy: Deleting stale PID file.
+Apr 07 15:54:41 CommandProxy: Deleting stale PID file.
+Apr 07 15:55:07 CommandProxy: Deleting stale PID file.
+Apr 07 16:06:18 CommandProxy: Deleting stale PID file.
+Apr 23 08:03:29 CommandProxy: Deleting stale PID file.
+May 01 14:09:53 CommandProxy: Process found at , but it isn't this script.
+May 01 14:09:53 CommandProxy: Deleting stale PID file
+May 22 08:01:20 CommandProxy: Process found at , but it isn't this script.
+May 22 08:01:20 CommandProxy: Deleting stale PID file
+May 27 13:44:31 CommandProxy: Process found at , but it isn't this script.
+May 27 13:44:31 CommandProxy: Deleting stale PID file
+May 28 08:04:24 CommandProxy: Deleting stale PID file.

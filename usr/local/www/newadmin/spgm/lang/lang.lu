@@ -1,0 +1,44 @@
+<?php
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'generéiert mat >SPGM_LINK<';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = 'Säit >CURRENT_PAGE< vun >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'Filter';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'nei Biller';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'aal Biller';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Diashow';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = 'Bild >CURRENT_PIC< vun >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'Bild';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'Biller';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'neit Bild';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = 'nei Biller';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'nei Gallerie';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Haaptgallerie'; 
+
+# Iwwersaat vun: BioHazard, Lëtzebuerg
+
+?>

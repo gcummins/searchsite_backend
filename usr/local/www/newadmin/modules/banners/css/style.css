@@ -1,0 +1,12 @@
+td.banner_td_id, td.banner_td_default
+{
+	width: 3em;
+}
+td.banner_td_id
+{
+	text-align: right;
+}
+td.banner_td_default
+{
+	text-align: center;
+}

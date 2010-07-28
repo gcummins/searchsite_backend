@@ -1,0 +1,130 @@
+<?php
+// Mapping and processing function for Commission Junction feeds.
+
+function loadCJData($sourceTable, $targetTable)
+{
+	global $link, $db;
+
+	logger("In " .__FUNCTION__ . "()", LEVEL_MINUTIA);
+	
+	// Determine if the requested table exists
+	$checkExistingTableQuery = "SHOW TABLES LIKE '$sourceTable';";
+	$db->query($checkExistingTableQuery);
+
+	if (!$db->rowCount())
+	{
+		logger("The table '$sourceTable' does not exist. Skipping.", LEVEL_DATA_WARNING);
+		return;
+	}
+	
+	// Determine how many rows are in the table. This is used for statistical analysis.
+	$recordCountQuery = "SELECT count(*) AS count FROM $sourceTable;";
+	$db->query($recordCountQuery);
+	
+	$countRow = $db->firstObject();
+	$totalRowCount = $countRow->count;
+	
+	// Create a speedcheck
+	$speedcheck = new SpeedCheck("Copying CJ rows to permanent tables");
+	
+	logger("Loading data from Commission Junction table '$sourceTable' containing $totalRowCount products.", LEVEL_INFORMATION);
+
+	$startingRecord = 0;
+	while ($startingRecord <= $totalRowCount)
+	{
+		// First, load all data from the source table
+
+		$loadDataQuery = "SELECT * FROM $sourceTable LIMIT $startingRecord," . FEEDMAPPING_MAX_RECORDS_PER_BLOCK . ";";
+		$db->query($loadDataQuery, true, false);
+
+		$printOutput = "Loading records $startingRecord to ";
+		if ($startingRecord+FEEDMAPPING_MAX_RECORDS_PER_BLOCK > $totalRowCount)
+		{
+			$printOutput .= "$totalRowCount";
+		}
+		else
+		{
+			$printOutput .= ($startingRecord+FEEDMAPPING_MAX_RECORDS_PER_BLOCK) . "";
+		}
+		logger($printOutput, LEVEL_MINUTIA);
+
+		foreach ($db->objects() as $row)
+		{
+			// When a new class instance is created, the old one is destroyed and the memory is freed.
+			// This behavior has been tested and verified.
+			$product = new Product();
+			
+			$product->ProgramName		= $row->ProgramName;
+			$product->ProgramURL		= htmlspecialchars($row->ProgramURL); // My tests show htmlspecialchars to be 8% faster than str_replace --gcummins 20081015
+			$product->LastUpdated		= $row->LastUpdated;
+			$product->ProductName		= $row->Name;
+			$product->Keywords			= $row->Keywords;
+			$product->LongDescription	= $row->Description;
+			// Nothing for InterimDescription
+			// Nothing for ShortDescription
+			// Nothing for BriefDescription
+			$product->SKU				= $row->SKU;
+			$product->Manufacturer		= $row->Manufacturer;
+			$product->ManufacturerID	= $row->ManufacturerID;
+			$product->UPC				= $row->UPC;
+			$product->ISBN				= $row->ISBN;
+			$product->Currency			= $row->Currency;
+	
+			// We want the actual price of the product to be listed in the 'Price' field
+			// Sometimes this comes in on the 'SalePrice' field, and sometimes on the 'Price' field
+			if ($row->SalePrice != 0)
+			{
+				$product->Price			= $row->SalePrice;
+				$product->RetailPrice	= $row->Price;
+			}
+			else
+			{
+				$product->Price			= $row->Price;
+				$product->RetailPrice	= $row->RetailPrice;
+			}
+			$product->FromPrice			= $row->FromPrice;
+			$product->BuyURL			= htmlspecialchars($row->BuyURL);
+			// Nothing for AddToCartURL
+			$product->ImpressionURL		= htmlspecialchars($row->ImpressionURL);
+			$product->ImageURL			= htmlspecialchars($row->ImageURL);
+			$product->Category			= $row->ThirdPartyCategory;
+			// Nothing for SecondaryCategory
+			$product->CategoryID		= $row->ThirdPartyID;
+			$product->CategoryCrumbs	= $row->AdvertiserCategory;
+			$product->Author			= $row->Author;
+			$product->Artist			= $row->Artist;
+			$product->Title				= $row->Title;
+			$product->Publisher			= $row->Publisher;
+			$product->Label				= $row->Label;
+			$product->Format			= $row->Format;
+			$product->Special			= $row->Special;
+			$product->PromotionalText	= $row->PromotionalText;
+			$product->StartDate			= $row->StartDate;
+			$product->EndDate			= $row->EndDate;
+			// Nothing for ShippingCost
+	
+			// Prepare the data for insertion into the database
+			$product->addSlashes();
+	
+			// Generate the insertion query
+			$insertQuery = $product->getCopyRecordQuery($targetTable);
+	
+			// Insert the data
+			$db->query($insertQuery, true, false);
+			
+			// Make sure we are still connected to the database server after a (potentially) long query
+			$db->ping("Lost connection to the database server during query: $insertQuery");
+			
+		}
+		$startingRecord += FEEDMAPPING_MAX_RECORDS_PER_BLOCK;
+		
+	}
+	
+	// End the speed check
+	$speedcheck->stop();
+	logger($speedcheck->getLogMessage(), LEVEL_INFORMATION);
+
+	// Remove the temporary table
+	removeTable($sourceTable);
+}
+?>

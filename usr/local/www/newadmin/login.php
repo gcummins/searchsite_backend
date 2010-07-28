@@ -1,0 +1,214 @@
+<?php
+
+define('APP_NAME', 'DH Admin');
+
+session_start();
+
+// Include the configuration settings
+include_once "configuration.php";
+include_once "newconfig.php";
+
+// Include the logging functions
+include_once "includes/log.php";
+
+// Connect to the database server
+include_once "includes/connect.php";
+
+// Include the module error handling functions
+include_once "modules/includes/error_handler.php";
+
+if (isset($_POST['username']) && !empty($_POST['username']) && isset($_POST['password']) && !empty($_POST['password']))
+{
+	processLogin($_POST['username'], $_POST['password']);
+}
+else
+{
+	showLoginForm();
+}
+
+function showLoginForm($error=false)
+{
+?>
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>DealHunting Search Site Administration</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="<?php echo ADMINPANEL_WEB_PATH; ?>/css/login.css" />
+<!--[if lt IE 7]>
+<link rel="stylesheet" type="text/css" href="<?php echo ADMINPANEL_WEB_PATH; ?>/css/login_ie6.css" />
+<![endif]-->
+<script type="text/javascript" src="<?php echo ADMINPANEL_WEB_PATH; ?>/js/login.js"></script>
+<!--[if lt IE 6]>
+<style type="text/css">
+body
+{
+	// Incorrectly applies 'center' to block-level elements,
+	// which helps us correct for the fact that margin: auto
+	// does not work in IE 5.
+	text-align: center;
+}
+#login
+{
+	text-align: left;
+}
+</style>
+<![endif]-->
+</head>
+<body onload="startupFunctions();">
+<div id="login" style="background-image: url('<?php echo ADMINPANEL_WEB_PATH; ?>/images/adlistings_logo_large.jpg')">
+	<div id="login_prompt" style="background-image: url('<?php echo ADMINPANEL_WEB_PATH; ?>/images/login_dialog.jpg');">
+		<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" onsubmit="document.getElementById('pageHeight').value=getPageHeight();document.getElementById('pageWidth').value=getPageWidth();" >
+			<p>
+				<label for="username">User Name:</label>
+				<input type="text" class="text" name="username" id="username" value="<?php echo (!empty($_POST['username'])) ? $_POST['username'] : ''; ?>"/><br />
+			
+				<label for="password">Password:</label>
+				<input type="password" class="text" name="password" id="password" /><br />
+			
+				<label for="submit">&nbsp;</label>
+				<input type="submit" name="submit" value="Submit" />
+			
+				<input type="hidden" name="pageHeight" id="pageHeight" value="" />
+				<input type="hidden" name="pageWidth" id="pageWidth" value="" />
+				<input type="hidden" name="module" value="<?php echo (array_key_exists('module', $_REQUEST)) ? $_REQUEST['module'] : ''; ?>" />
+				<input type="hidden" name="page" value="<?php echo (array_key_exists('module', $_REQUEST) && array_key_exists('page', $_REQUEST)) ? $_REQUEST['page'] : ''; ?>" />
+				<input type="hidden" name="task" value="<?php echo (array_key_exists('task', $_REQUEST)) ? $_REQUEST['task'] : ''; ?>" />
+			</p>
+		</form>
+	</div>
+</div>
+<?php
+if ($error != '')
+{
+	?>
+	<script type="text/javascript">
+	alert('<?php echo $error; ?>');
+	</script>
+	<?php
+}
+?>
+</body>
+</html>
+<?php
+}
+
+function processLogin($username, $password)
+{
+	global $adminLink;
+	
+	// Get the id of the 'login' module
+	$query = "SELECT id FROM modules WHERE name='login' LIMIT 1;";
+	if (false == ($result = mysql_query($query, $adminLink)))
+	{
+		returnError(902, $query, true, $adminLink);
+	}
+	
+	if (mysql_num_rows($result))
+	{
+		$row = mysql_fetch_object($result);
+		$moduleId = $row->id;
+	}
+	else
+	{
+		$moduleId = -1;
+	}
+	
+	// See if the login information is valid
+	$query = "SELECT id, firstName, lastName, group_id, enabled FROM `users` WHERE username='$username' AND password='" . md5($password) . "' LIMIT 1;";
+	if (false == ($result = mysql_query($query, $adminLink)))
+	{
+		returnError(202, "Unable to look up user information in the database.", true);
+	}
+
+	if (!mysql_num_rows($result))
+	{
+		// No match was found in the database, so the login is invalid
+		
+		// Log the attempt
+		logNotice('Failed Login', 'Login attempt using \'' . $_POST['username'] . '\'', '', $_SERVER['REQUEST_URI'] . $_SERVER['QUERY_STRING'], $moduleId);
+
+		showLoginForm('Username or passoword is invalid.');
+	}
+	else
+	{
+		$row = mysql_fetch_object($result);
+		
+		// Verify that the account is not locked
+		if ($row->enabled == 0)
+		{
+			logNotice('Locked Account Login', 'Locked account \'' . $_POST['username'] . '\' was accessed.', $_SERVER['REQUEST_URI'] . $_SERVER['QUERY_STRING'], $moduleId);
+			
+			showLoginForm('Account is locked');
+		}
+		else
+		{
+			// The login information matches a valid user account. Create the session and populate the variables
+			$_SESSION['username'] = $_POST['username'];
+	
+			$_SESSION['userid'] = $row->id;
+			$_SESSION['firstname'] = $row->firstName;
+			$_SESSION['lastname'] = $row->lastName;
+			$_SESSION['group_id'] = $row->group_id;
+			
+			// Create a session authentication key
+			$_SESSION['authkey'] = md5(time().$_SESSION['username'].'12');	// '12' is simply a random string to ensure that the 
+																			// authkey cannot be easily guessed.
+			
+			// Insert the authentication key into the database
+			$query = "UPDATE `users` SET authkey='" . $_SESSION['authkey'] . "' WHERE id=" . $row->id . ";";
+			if (false == (mysql_query($query, $adminLink)))
+			{
+				returnError(902, $query, true, $adminLink);
+			}
+	
+			// Set some sensible page size defaults
+			$pageHeight = "550";
+			$pageWidth = "650";
+			// Determine the page height and page width
+			if (isset($_REQUEST['pageHeight']) && (int)$_REQUEST['pageHeight'] > $pageHeight) // We won't use any artificially low values
+			{
+				$pageHeight = (int)$_REQUEST['pageHeight'];
+			}
+			if (isset($_REQUEST['pageWidth']) && (int)$_REQUEST['pageWidth'] > $pageWidth) // We won't use any artificially low values
+			{
+				$pageWidth = (int)$_REQUEST['pageWidth'];
+			}
+			// Add the page height and width to the session
+			$_SESSION['page_height'] = $pageHeight;
+			$_SESSION['page_width'] = $pageWidth;
+	
+			logNotice('Successful Login', '', $_SERVER['REQUEST_URI'] . $_SERVER['QUERY_STRING'], $moduleId);
+
+			// Determine if a module, page, or task were specified
+			$queryString = "";
+			if (array_key_exists('module', $_REQUEST))
+			{
+				$queryString .= "module=" . (int)$_REQUEST['module'];
+			}
+		
+			if (array_key_exists('task', $_REQUEST))
+			{
+				if (!empty($queryString))
+				{
+					$queryString .= "&";
+				}
+				$queryString .= "task=" . htmlentities($_REQUEST['task']);
+			}
+			
+			$url = ADMINPANEL_WEB_PATH . "/";
+			
+			if (!empty($queryString))
+			{
+				$url .= "?$queryString";
+			}
+
+			header("Location: $url");
+			exit();
+		}
+	}
+}
+
+?>

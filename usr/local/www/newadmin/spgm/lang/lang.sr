@@ -1,0 +1,45 @@
+<?php
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'Galerija napravljena pomoću >SPGM_LINK<';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = 'Strana >CURRENT_PAGE< od >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'filter';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'novo';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'sve';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Slajdšou';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = 'Slika >CURRENT_PIC< od >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'slika';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'slika';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'nova slika';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = 'novih slika';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'nova galerija';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Početna galerija';
+
+# Title for EXIF data screen
+$spgm_cfg['locale']['exifHeading'] = 'EXIF podaci za';
+
+?>

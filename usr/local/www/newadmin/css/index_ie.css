@@ -1,0 +1,19 @@
+ul#ul_configuration div
+{
+	padding: 1em 1em 1.5em 1em;
+}
+ul#ul_configuration li a
+{
+	padding-top: 3px;
+}
+ul#ul_configuration label
+{
+	color: #000;
+	font-weight: normal;
+	width: 50%;
+	text-align: left;
+}
+ul#ul_configuration input
+{
+	margin-bottom: 2px;
+}

@@ -1,0 +1,163 @@
+<?php
+
+session_start();
+
+// This is a temporary work-around
+// We need to find a way to allow this script to be accessed via AJAX calls, but not directly
+// by an external user.
+define('APP_NAME', 'DH Admin');
+
+include_once "../includes/error_handler.php";
+
+include_once "../../configuration.php";
+
+include_once "../../includes/connect.php";
+
+include_once "../../includes/log.php";
+
+// Troubleshooting section
+$outputString = "1";
+foreach($_POST as $field=>$value)
+{
+	$outputString .= "$field: $value\n";
+}
+
+// Determine how we have been called
+if (isset($_GET) && isset($_GET['ak']))
+{
+	// Called via direct HTTP request
+	// We will need to return the user to the calling page
+	if (array_key_exists('module', $_GET))
+	{
+		$module = $_GET['module'];
+	}
+	else
+	{
+		$module = null;
+	}
+	
+	if (array_key_exists('page', $_GET))
+	{
+		$page = $_GET['page'];
+	}
+	else
+	{
+		$page = null;
+	}
+	
+	$callingMethod = 'get';
+}
+elseif (isset($_POST) && isset($_POST['ak']))
+{
+	// Called via an AJAX backend connection
+	
+	$callingMethod = 'post';
+}
+else
+{
+	returnError(100, "Invalid Invocation Method. " . count($_POST) . " " . count($_GET));
+	die();
+}
+
+if (array_key_exists('daemonid', $_REQUEST) && !empty($_REQUEST['daemonid']))
+{
+	$daemonId = intval($_REQUEST['daemonid']);
+}
+else
+{
+	returnError(200, 'The daemon id must be provided.');
+}
+
+if (array_key_exists('action', $_REQUEST) && ($_REQUEST['action'] == 'on' || $_REQUEST['action'] == 'off'))
+{
+	$action = ($_REQUEST['action'] == 'on' ? 1 : 0);
+}
+
+// Take appropriate action here to enable or disable the daemon
+//
+switch ($action)
+{
+	case 'on':
+		activitateService($daemonId);
+		break;
+	case 'off':
+		deactivateService($daemonId);
+		break;
+}
+
+// Return an appropriate response based on the calling method
+if ($callingMethod == 'get')
+{
+	//header("Location: " . ADMIN_PATH . "?module=$module");
+	echo 'get';
+	exit();
+elseif ($callingMethod == 'post')
+{
+	echo '0'; // Send a "successful" response to the calling script
+	exit();
+}
+
+function deactivateService($daemonid)
+{
+	global $adminLink;
+	
+	// First, get the PID of the service
+	$query = "SELECT pid FROM datafeeds.dl_daemon WHERE id=$daemonid;";
+	$result = mysql_query($query, $adminLink) or returnError(902, $query, 'true', $adminLink);
+	$row = mysql_fetch_object($result);
+	
+	$pid = $row->pid;
+	
+	// Determine if the process running at this PID is the correct one
+	$commandToRun = "/bin/ps -p $pid";
+	$arrCommandResults = array();
+	exec($commandToRun, $arrCommandResults);
+	if (1 != count($arrCommandResults))
+	{
+		switch($daemonid)
+		{
+			case 1:
+				$binName = 'dataloader';
+				break;
+			case 2:
+				$binName = 'linkshare';
+				break;
+			default:
+				$binName = 'dataloader';
+				break;
+		}
+
+		// Something is running at the PID in question. Determine if it is this script
+		if (false !== strstr(strtolower($arrCommandResults[1]), $binName))
+		{
+			// The daemon is running at the PID found. Kill the process.
+			$killCommand = "kill -9 $pid";
+			$arrKillResults = array();
+			exec($killCommand, $arrKillResults);
+			if ($arrKillResults[0] == '0')
+			{
+				echo '0';
+				exit();
+			}
+			else
+			{
+				returnError(107, "Unable to kill the process with ID $pid.");
+				exit();
+			}
+		}
+		else
+		{
+			// The process running at the PID found does not match the name
+			// of the daemon.
+			returnError(106, 'Daemon is not running at the PID specified. This may mean that the daemon is not running, or that manual shutdown is required.');
+		}
+	}
+	else
+	{
+		// Delete the stale PID file
+		logger("Deleting stale PID file");
+		unlink($daemonFiles.$cnfPIDfile);
+	}
+}
+
+?>

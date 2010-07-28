@@ -1,0 +1,289 @@
+function confirmCompanyDelete(companyName, companyId, serverPath, module)
+{
+	if (confirm("Are you sure you want to delete company: " + companyName + "?"))
+	{
+		targetLocation		= serverPath + '?module=' + module + '&task=deleteSubmit&companyid=' + companyId;
+		document.location = targetLocation;
+	}
+}
+
+function setModalPosition()
+{
+	var wWidth = getWindowWidth();
+	
+	var leftEdge = wWidth/2 - modalWidth/2; // modalWidth is defined in index.js.php
+	
+	document.getElementById('edit_div').style.left = leftEdge + 'px';
+}
+
+function showEditDiv(companyId, adminPath, moduleName, scriptName, module)
+{
+	setModalPosition();
+	
+	xmlHttpModal = getXmlHttpObject();
+	
+	var date = new Date();
+	var timestamp = date.getTime();
+	
+	var url = adminPath + '/modules/' + moduleName + '/fakeModalContents.php?time=' + timestamp + '&scriptname=' + scriptName + '&module=' + module + '&companyid=' + companyId;
+
+	//xmlHttpModal.onreadystatechange=modalResponseReceived;
+	xmlHttpModal.onreadystatechange=function()
+	{
+		modalResponseReceived(adminPath, moduleName);
+	}
+	xmlHttpModal.open("GET",url,true);
+	xmlHttpModal.send(null);	
+	
+	//populateAffiliateSelect(adminPath, moduleName);
+		
+	datePickerController.create();
+}
+
+function showNewDiv(adminPath, moduleName, scriptName, module)
+{
+	setModalPosition();
+	
+	xmlHttpModal = getXmlHttpObject();
+	
+	var date = new Date();
+	var timestamp = date.getTime();
+
+	var url = adminPath + '/modules/' + moduleName + '/fakeModalContents.php?time=' + timestamp + '&scriptname=' + scriptName + '&module=' + module;
+	
+	xmlHttpModal.onreadystatechange=function()
+	{
+		modalResponseReceived(adminPath, moduleName);
+	}
+	xmlHttpModal.open("GET",url,true);
+	xmlHttpModal.send(null);	
+}
+function hideEditDiv()
+{
+	document.getElementById('modalContainer').style.display = "none";
+}
+function submitChanges(serverPath, module)
+{
+	var validSubmission = true;
+	var output = '';
+
+	var companyId = null;
+	var task = document.getElementById('edit_task').value;
+	{
+		if (task == 'saveEdit')
+		{
+			companyId = document.getElementById('edit_company_id');
+		}
+	}
+	
+	var arrOutput = new Array();	
+
+	var arrFields = new Array();
+	
+	/* PARAMETERS:
+		 0: required (true or false)
+		 1: field id
+		 2: display name
+	 */
+	arrFields[0] = new Array(true, 'edit_company', 'Company');
+	arrFields[1] = new Array(false, 'edit_aff_type', 'Affiliate Type');
+	arrFields[2] = new Array(false, 'edit_banner', 'Banner');
+	arrFields[3] = new Array(false, 'edit_expiration_date', 'Banner Expiration');
+	arrFields[4] = new Array(true, 'edit_url', 'URL');	
+	arrFields[5] = new Array(false, 'edit_clean_url', 'Clean URL');	
+	arrFields[6] = new Array(false, 'edit_joblo_url', 'JoBlo URL');
+	arrFields[7] = new Array(false, 'edit_alert', 'No Coupon Alert');
+	arrFields[8] = new Array(false, 'edit_usship', 'Ships to the U.S.');
+	arrFields[9] = new Array(false, 'edit_canadaship', 'Ships to Canada');
+	arrFields[10] = new Array(false, 'edit_ukship', 'Ships to the U.K.');
+	
+	// Check for required fields that are emtpy
+	for (var j=0; j<arrFields.length; j++)
+	{
+		theField = arrFields[j];
+		if (theField[0] == true && document.getElementById(theField[1]).value == '')
+		{
+			validSubmission = false;
+			arrOutput.push(theField[2]);
+		}
+	}
+
+	if (validSubmission == false)
+	{
+		output = "The following field";
+		
+		if (arrOutput.length > 1)
+		{
+			output += 's are';
+		}
+		else
+		{
+			output += ' is';
+		}
+		
+		output += " required:\n\n";
+		
+		for (var i=0; i<arrOutput.length; i++)
+		{
+			output += ' - ' + arrOutput[i] + '\n';
+		}
+		alert(output);
+		return false;
+	}
+	else
+	{
+		return true;
+		/*
+		var targetLocation = serverPath + '?module=' + module + '&task=' + task + '&companyid=' + companyId;
+		for (var k=0; k<arrFields.length; k++)
+		{
+			//targetLocation += '&' + arrFields[k][1] + '=' + encodeURIComponent(document.getElementById(arrFields[k][1]).value);
+			targetLocation += '&' + arrFields[k][1] + '=' + escape(document.getElementById(arrFields[k][1]).value);
+			document.location = targetLocation;
+		}
+		*/
+	}
+}
+
+function showSection(sectionName)
+{
+	hideAllSections();
+	
+	document.getElementById('section_' + sectionName + '_li').className = 'section_active';
+	thisSection = document.getElementById('section_'+sectionName);
+	thisSection.className = 'showIt';
+	
+	document.getElementById('edit_task').value = 'saveNew';
+	return true;
+}
+
+function hideAllSections()
+{
+	var arrSections = new Array();
+	arrSections[0] = 'general';
+	arrSections[1] = 'url';
+	arrSections[2] = 'coupons';
+	arrSections[3] = 'shipping';
+
+	for (var i=0; i<arrSections.length; i++)
+	{
+		document.getElementById('section_' + arrSections[i]).className = 'hideIt';
+		document.getElementById('section_' + arrSections[i] + '_li').className = 'section_inactive';
+	}
+	
+	return true;
+}
+
+function populateAffiliateSelect(adminPath, moduleName)
+{
+	xmlHttpAffiliate=getXmlHttpObject();
+	
+	var date = new Date();
+	var timestamp = date.getTime();
+
+	var url = adminPath + '/modules/' + moduleName + '/companyaffiliates.php?time=' + timestamp; // The timestamp is simply to stop IE from serving cached copies of the request.
+
+	xmlHttpAffiliate.onreadystatechange=affiliateFetchStateChanged;
+	xmlHttpAffiliate.open("GET",url,true);
+	xmlHttpAffiliate.send(null);
+	return true;
+}
+
+function affiliateFetchStateChanged()
+{
+		if (xmlHttpAffiliate.readyState == 4 || xmlHttpAffiliate.readyState == "complete")
+		{
+			if (xmlHttpAffiliate.status == 200)
+			{
+				// If the object 'affiliateResponseObject' already exists and has data, clear it
+				if (typeof(eval(window)[affiliateResponseObject]) != 'undefined')
+				{
+					for (j=0; j<affiliateResponseObject.length; j++)
+					{
+						affiliateResponseObject[i] = null;
+					}
+				}			
+
+				// Receive the list of affiliates in JSON format, and populate the Affiliate_type select control
+				var affiliateResponseObject = eval('('+xmlHttpAffiliate.responseText+')');
+				
+				affiliateSelectOutput = document.getElementById('edit_aff_type');
+				
+				// Clear all elements from the select list
+				while (affiliateSelectOutput.length > 0)
+				{
+					affiliateSelectOutput.remove(affiliateSelectOutput.length - 1);	
+				}
+				
+				// Add the default element
+				var defaultElement = document.createElement('option');
+				defaultElement.value = 0;
+				defaultElement.text = "Select one...";
+				affiliateSelectOutput.appendChild(defaultElement);
+
+				for (i=0; i<affiliateResponseObject.affiliates.length; i++)
+				{
+					var affiliateSelectOption = document.createElement('option');
+
+					affiliateSelectOption.value = affiliateResponseObject.affiliates[i].affiliate_type_id;
+					betterInnerHtml(affiliateSelectOption, affiliateResponseObject.affiliates[i].label, true);
+					affiliateSelectOutput.appendChild(affiliateSelectOption);
+				}
+			}
+			else
+			{
+				if (xmlHttpAffiliate.status == 404)
+				{
+					alert("Request failed because the target script does not exist.");
+				}
+				else if (xmlHttpAffiliate.status == 503)
+				{
+					alert("Request failed because the target script permissions make it inaccessible.");
+				}
+				else
+				{
+					alert("Request failed with HTTP Response Code "+xmlHttpAffiliate.status);
+				}
+				return false;
+			}
+			
+		}	
+}
+function modalResponseReceived(adminPath, moduleName)
+{
+	if (xmlHttpModal.readyState == 4 || xmlHttpModal.readyState == "complete")
+	{
+			var tempnewdiv = document.createElement('div');
+			tempnewdiv.innerHTML = xmlHttpModal.responseText;
+			var container = document.getElementById('edit_div');
+			
+			// Clear anything that is already in 'edit_div'
+			betterInnerHtml(container, '', true);
+			container.appendChild(tempnewdiv);
+
+			document.getElementById('modalContainer').style.display = "block";
+			showSection('general');
+			
+			populateAffiliateSelect(adminPath, moduleName);
+			
+			datePickerController.create();
+			
+			return true;
+	}
+}
+function redirection_edit(rowID, adminPath, moduleName)
+{	
+	// Make a new form, populate the form with the details for this company, and display it.
+	showPopWin(adminPath + '/modules/' + moduleName + '/modalform.php?id='+rowID, 400, 525, return_function);
+	
+}
+
+function return_function()
+{
+	alert("return_function() was called.");
+}
+
+function loadSortOrder(theSelect)
+{
+	location.href = "<?php echo ADMIN_PATH; ?>/?module=<?php echo $module; ?>&sortby="+theSelect.value;
+}

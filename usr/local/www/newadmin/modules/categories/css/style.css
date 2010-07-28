@@ -1,0 +1,25 @@
+#div_linked_companies_container
+{
+	position: fixed;
+}
+#div_linked_companies_inner_container form
+{
+	width: 100%;
+}
+#div_linked_companies_inner_container select
+{
+	width: 300px;
+}
+#div_linked_companies_inner_container table label
+{
+	display: block;
+	width: 100%;
+	white-space: nowrap;
+	text-align: center;
+	font-weight: bold;
+}
+.form_button_div
+{
+	padding-right: 12px;
+	padding-bottom: 0;
+}

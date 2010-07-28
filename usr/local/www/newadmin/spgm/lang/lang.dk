@@ -1,0 +1,42 @@
+<?php
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'Dette galleri er genereret af >SPGM_LINK< programmet';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = 'Side >CURRENT_PAGE< af >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'filter';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'nye';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'alle';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Slideshow';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = 'Billede >CURRENT_PIC< af >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'billede';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'billeder';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'nyt billede';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = 'nye billeder';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'nyt galleri';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Hoved galleri';
+
+?>

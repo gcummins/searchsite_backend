@@ -1,0 +1,27 @@
+<?php
+
+define('APP_NAME', 'DH Admin');
+
+include '/home/development/www.dealhunting.com/newadmin/configuration.php';
+include '/home/development/www.dealhunting.com/newadmin/includes/connect.php';
+
+$query = "SELECT `affiliate_type_id`, `label`FROM `affiliate_type` ORDER BY `label` ASC;";
+$result = mysql_query($query, $dealhuntingLink) or die("ERROR: " . mysql_error($dealhuntingLink));
+
+$output = '{"affiliates":[';
+
+if (mysql_num_rows($result) > 0)
+{
+	while ($row = mysql_fetch_object($result))
+	{
+		$output .= '{"affiliate_type_id":' . $row->affiliate_type_id . ', "label":"' . $row->label . '"},';
+	}
+	$output = substr($output, 0, -1);
+	$output .= ']}';
+}
+else
+{
+	$output .= 'null]}';
+}
+echo $output;
+?>

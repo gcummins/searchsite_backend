@@ -1,0 +1,42 @@
+<?php
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = 'A gall&eacute;ria az >SPGM_LINK< seg&iacute;ts&eacute;g&eacute;vel k&eacute;sz&uuml;lt';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = '>CURRENT_PAGE<. lap a >NB_PAGES<';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'sz&uuml;r&otilde;';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = '&uacute;j';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'mind';
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Slideshow';
+
+# pictures navi bar
+$spgm_cfg['locale']['pictureNaviBar'] = '>CURRENT_PIC<. k&eacute;p a >NB_PICS<';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'k&eacute;p';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = 'k&eacute;p';
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = '&uacute;j k&eacute;p';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = '&uacute;j k&eacute;p';
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = '&uacute;j gall&eacute;ria';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'Gall&eacute;ria';
+
+?>

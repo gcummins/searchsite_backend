@@ -1,0 +1,43 @@
+<?php
+
+# link to SPGM
+$spgm_cfg['locale']['spgmLink'] = '‫این آلبوم توسط >SPGM_LINK< تولید شده است.‬‎';
+
+# thumbnails navi bar
+$spgm_cfg['locale']['thumbnailNaviBar']  = '‫صفحه‌ی >CURRENT_PAGE< از >NB_PAGES<‬‎';
+
+# filter label
+$spgm_cfg['locale']['filter'] = 'فیلتر‎';
+
+# filter value for 'new pictures'
+$spgm_cfg['locale']['filterNew'] = 'جدید‎';
+
+# filter value for 'all pictures'
+$spgm_cfg['locale']['filterAll'] = 'همه‎';
+
+# pictures navi bar
+
+# filter value for 'slideshow'
+$spgm_cfg['locale']['filterSlideshow'] = 'Slideshow';
+
+$spgm_cfg['locale']['pictureNaviBar'] = '‫عکسِ >CURRENT_PIC< از >NB_PICS<‬‎';
+
+# picture label (as in '1 picture')
+$spgm_cfg['locale']['picture'] = 'عکس‎';
+
+# pictures label (as in '2 pictures')
+$spgm_cfg['locale']['pictures'] = $spgm_cfg['locale']['picture'];
+
+# new picture label (as in '1 new picture')
+$spgm_cfg['locale']['newPicture'] = 'عکسِ جدید‎';
+
+# new pictures label (as in '2 new pictures')
+$spgm_cfg['locale']['newPictures'] = $spgm_cfg['locale']['newPicture'];
+
+# new gallery label
+$spgm_cfg['locale']['newGallery'] = 'آلبومِ جدید‎';
+
+# main gallery label
+$spgm_cfg['locale']['rootGallery'] = 'آلبومِ اصلی‎';
+
+?>

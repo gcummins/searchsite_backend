@@ -1,0 +1,78 @@
+#pagecontent table.contentTable
+{
+	border: 1px solid #000;
+	width: 456px;
+}
+#pagecontent table.contentTable tr.table_titlebar
+{
+	border-bottom: 1px solid #000;
+}
+#pagecontent table.contentTable tr.table_titlebar:hover td
+{
+	background-color: #225dc6;
+}
+#pagecontent table.contentTable tr:hover td
+{
+	cursor: default;
+	background-color: #fff;
+}
+#pagecontent table.contentTable tr td
+{
+	border: none;
+}
+legend
+{
+	font-weight: bold;
+}
+#pagecontent table.contentTable label
+{
+	font-weight: bold;
+}
+#pagecontent table.contentTable textarea
+{
+	width: 225px;
+}
+#pagecontent table.contentTable tr td span.subheading
+{
+	font-weight: bold;
+}
+#pagecontent table.contentTable tr td table
+{
+	border-collapse: collapse;
+	width: 100%;
+	margin: 5px 0;
+}
+#pagecontent table.contentTable tr td table a img
+{
+	border: none;
+}
+#pagecontent table.contentTable tr td table tr th
+{
+	
+}
+#pagecontent table.contentTable tr td table tr td
+{
+	border: 1px solid #000;
+}
+#pagecontent table.contentTable tr td table tr td.td_number
+{
+	text-align: right;
+}
+#pagecontent table.contentTable tr td table span.daemon_properties
+{
+	display: block;
+	padding-left: 15px;
+	background-image: url('<?php echo ADMIN_PATH; ?>/images/properties.gif');
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+#pagecontent table.contentTable table.fsspace
+{
+	width: auto;
+	margin: auto;
+	border: none;
+}
+#pagecontent table.contentTable table.fsspace td
+{
+	border: none;
+}

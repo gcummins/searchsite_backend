@@ -1,0 +1,1016 @@
+html
+{
+	overflow-y: scroll;
+}
+html, body
+{
+	margin: 0px;
+	padding: 0px;
+	font-family: Arial, Verdana, sans;
+	font-size: 95%;
+	color: #000;
+	height: 100%;
+	width: 100%;
+}
+.bodytable
+{
+	border-collapse: collapse;
+	border-spacing: 0px;
+	padding: 0px;
+	margin: 0;
+	background-color: #ECE9D8;
+	width: 100%;
+	border: none;
+}
+.bodytable tr
+{
+	padding: 0;
+}
+.bodytable td
+{
+	padding: 0;
+}
+#bluebar
+{
+	width: 100%;
+	background-repeat: repeat-x;
+	padding: 0px;
+	margin: 0px;
+	height: 30px;
+}
+#bluebar a
+{
+	border: none;
+	text-decoration: none;
+}
+#bluebar a img
+{
+	border: 0px;
+	margin: 0px;
+	padding: 0px;
+}
+#bluebar span#bluebar_title
+{
+	color: #fff;
+	font-weight: bold;
+	position: absolute;
+	margin: 5px 0 0 0;
+	padding: 0;
+}
+#bluebar img#bluebar_close
+{
+	padding: 0 3px;
+	float: right;
+}
+#bluebar img#bluebar_question
+{
+	padding: 0 3px; 
+	float: right;
+}
+#td_leftbar_container
+{
+	height: 100%;
+	/*border-right: 1px solid #000;*/
+}
+table#leftbar
+{
+	height: 100%;
+	width: 159px;
+	visibility: hidden;
+	border-collapse: collapse;
+	padding: 0px;
+	border-spacing: 0px;
+	font-size: 12px;
+}
+table#leftbar tr
+{
+	background-color: #606060;
+	padding: 0;
+}
+table#leftbar td
+{
+	padding: 0px;
+}
+table#leftbar tr td.menuHeading
+{
+	font-size: 16px;
+	height: 25px;
+}
+table#leftbar tr td span.section_title
+{
+	display: block;
+	background-color: #c0c0c0;
+	border-top: 3px solid #e3e3e3;
+	border-left: 3px solid #e3e3e3;
+	border-bottom: 3px solid #7d7d7d;
+	border-right: 3px solid #7d7d7d;
+	text-align: center;
+	cursor: default;
+}
+/* Styles for the CSS menu bar */
+div#leftbar
+{
+	width: 168px;
+	margin-right: 1px;
+}
+#menu_css ul ul
+{
+	display: none;
+}
+#menu_css ul ul.show
+{
+	display: block;
+}
+.menubuttons
+{
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+	width: 159px;
+	font-size: 100%;
+}
+.menubuttons ul
+{
+	list-style-type: none;
+	margin: 0px 0px 0px 0px;
+	padding: 0;	
+	font-size: 95%;
+}
+.menubuttons li a
+{
+	color: #fff;
+	display: block;
+	width: 100%;
+	padding: 4px 4px;
+	margin: 0px;
+	font-weight: bold;
+	text-decoration: none;
+	border: 1px solid;
+	border-color: #fff #475360 #bdbdbd #a0a0a0; /*light dark dark light*/
+	background-color: #E27000; /*#A0A0A0;*/
+}
+.menubuttons ul li a
+{
+	padding: 3px 0px 3px 8px;
+	font-weight: normal;
+	background-color: #c3c3c3;
+	color: #4A4A4A;
+}
+.menubuttons ul li.activeSubmenu
+{
+	border-left: 3px solid blue;
+}
+.menubuttons ul li.activeSubmenu a:hover, .menubuttons ul li.activeSubmenu a:active
+{
+	border-left: none;
+}
+.menubuttons ul li.activeSubmenu a
+{
+	color: #000;
+}
+.menubuttons li a:visited
+{
+	color: #fff;
+}
+.menubuttons ul li a:visited
+{
+	color: #4A4A4A;
+}
+.menubuttons ul li.activeSubmenu a:visited
+{
+	color: #000;
+}
+.menubuttons li a:hover, .menubuttons li a:active, .menubuttons ul li a:hover, .menubuttons ul li a:active
+{
+	color: #000;
+	background-color: #6A8EB2;
+}
+.menubuttons ul li a:hover, .menubuttons ul li a:active
+{
+	border-left: 3px solid #fff;
+}
+/* End styles for the CSS menu bar */
+#activeSubMenu
+{
+	padding: 0;
+	margin: 0;
+}
+ul#activeSubMenuList
+{
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	width: 100%;
+}
+ul#activeSubMenuList li
+{
+	color: #fff;
+	height: 47px;
+	border: 1px solid #606060;
+	margin: 0 0 10px 0;
+	font-size: 15px;
+	cursor: pointer;
+}
+ul#activeSubMenuList li span
+{
+	display: block;
+	text-align: center;
+	height: 47px;
+	margin: 32px 0 0 0;
+}
+ul#activeSubMenuList li:hover span
+{
+	font-weight: bold;
+}
+#scrollUpDiv
+{
+	position: absolute;
+	left: 134px;
+}
+#scrollDownDiv
+{
+	position: absolute;
+	left: 134px;
+}
+#ScrollContainer
+{
+	overflow: hidden;
+	position: relative;
+	/*height: 715px;*/
+	/* This height needs to be set dynamically based on the screen real-estate available and the
+	   number of module sections displayed in the leftbar */
+	height: 450px;
+}
+#activeSubMenu
+{
+	width: 100%;
+}
+#pagecontent
+{
+	width: 100%;
+	background-color: #ece9d8;
+}
+#pagecontent form
+{
+	width: 390px;
+	margin: 20px auto;
+}
+#pagecontent form h3
+{
+	text-align: center;
+}
+#pagecontent form label
+{
+	float: left;
+	display: block;
+	text-align: right;
+	width: 125px;
+	margin-right: 10px;
+}
+#pagecontent form input.formtext
+{
+	float: left;
+	width: 225px;
+}
+#pagecontent form input.checkbox
+{
+	width: 13px;
+}
+#pagecontent form br
+{
+	clear: left;
+}
+.contentTable
+{
+	margin: 20px auto;
+	width: 98%;
+	border-spacing: 0px;
+	border-collapse: collapse;
+	font-size: 85%;
+}
+.contentTable a
+{
+	text-decoration: none;
+	color: blue; /* Make sure the links are always blue, whether visited or not */
+}
+.contentTable a:hover
+{
+	text-decoration: underline;
+}
+
+.contentTable td, .contentTable th
+{
+	border: 1px solid #000;
+	padding: 2px 3px;
+}
+
+.contentTable th
+{
+	background-image: url(../images/th_gradient.gif);
+	background-repeat: repeat-x;
+}
+
+.contentTable td
+{
+	background-color: #fff;
+}
+.contentTable tr:hover td
+{
+	background-color: #d6dff7;
+	cursor: default;
+}
+.contentTable tr:hover td a
+{
+	text-decoration: none;
+}
+.table_titlebar td
+{
+	color: #fff;
+	font-weight: bold;
+	cursor: text;
+	padding: 3px;
+	background: #225dc6 url(../images/title_gradient.gif) repeat-x;
+}
+
+.contentTable tr.table_titlebar td span.title_detail
+{
+	font-weight: normal;
+}
+
+.contentTable tr.table_titlebar td span.title_link a
+{
+	float: right;
+	color: #fff;
+	text-decoration: none;
+}
+.contentTable td#create_new
+{
+	text-align: right;
+	border: none;
+	background-color: #ece9d8;
+}
+.contentTable td.empty_create_button_cell
+{
+	height: 2em;
+}
+.contentTable tr:hover td#create_new
+{
+	background-color: #ece9d8;
+	cursor: default;
+}
+.contentTable a img
+{
+	border: none;
+}
+.action_buttons
+{
+	width: 40px;
+	text-align: center;
+}
+/*
+#errorPane
+{
+	color: #8b0000;
+	display: none;
+	font-weight: bold;
+	background-color: #ff8888;
+	background-repeat: repeat-x;
+	background-position: bottom left;
+}
+*/
+#errorPane
+{
+	color: red; /*#8b0000;*/
+	display: none;
+	/*font-weight: bold;*/
+	border: 2px dotted red;
+	margin: 10px;
+}
+#errorPane p
+{
+	margin: 0;
+	padding: 15px 15px 15px 15px;
+	text-align: center;
+}
+/*
+#errorPane.information
+{
+	color: #41763a;
+	background-color: #9cf390;
+}
+*/
+#errorPane.information
+{
+	border-color: green;
+	color: green;
+	/*color: #41763a;*/
+}
+/*
+#errorPane span#errorLeftCorner, #errorPane span#errorRightCorner
+{
+	display: block;
+	position: relative;
+	height: 20px;
+	width: 20px;
+	background-repeat: no-repeat;
+}
+*/
+#errorPane span#errorLeftCorner, #errorPane span#errorRightCorner
+{
+	display: none;
+}
+/*
+#errorPane span#errorRightCorner
+{
+	float: right;
+}*/
+#scriptBusyInnerDiv
+{
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 250px;
+	height: 40px;
+	background-color: #fff;
+	z-index: 2;
+	border: 2px solid green;
+	text-align: center;
+}
+/* Styles for the Fake Modal Dialogs */
+#modalContainer, #scriptBusyContainer, #div_linked_companies_container, #modalContainer_banners
+{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	display: none;
+}
+.translucentbackground
+{
+	width: 100%;
+	height: 300%;
+	background-color: #000;
+	filter: alpha(opacity=30);
+	-moz-opacity: 0.3;
+	opacity: 0.3;
+}
+#edit_div, #div_linked_companies_inner_container, #banner_selection_div
+{
+	position: absolute;
+	top: 50px;
+	background-color: #fff;
+	z-index: 1;
+	border: 2px solid #225dc6;
+	border-left: 2px solid #5579B9;
+	border-top: 2px solid #5579B9;
+}
+#edit_div table
+{
+	width: 100%;
+}
+#edit_div table td.detail_cell
+{
+	padding: 0px 12px;
+	width: 100%;
+}
+#edit_div table td.detail_cell label
+{
+	display: block;
+	width: 155px;
+	float: left;
+	text-align: right;
+	padding-right: 0px;
+}
+#edit_div table td.detail_cell input, #edit_div table td.detail_cell select, #edit_div table td.detail_cell textarea
+{
+	margin: 0px 5px 10px 12px;
+	width: 150px;
+}
+#edit_div table td.detail_cell #section_container
+{
+	padding: 15px 0px 0px 0px;
+	background-color: #e0e0e0;
+	-moz-border-radius-topright: 5px;
+	-webkit-border-top-right-radius: 5px;
+}
+.js_holder_div
+{
+	margin: 0px;
+	padding: 0px;
+}
+.edit_div_title
+{
+	display: block;
+	margin: 0px 0px 12px 0px;
+	padding: 3px 0px 3px 10px;
+	color: #fff;
+	font-weight: bold;
+	background: #225dc6;
+}
+.form_button_div
+{
+	text-align: right;
+	direction: rtl;
+	padding: 24px 0px 12px 0px;
+	margin: 0px;
+}
+#section_container div.showIt
+{
+	display: block;
+}
+#section_container div.hideIt
+{
+	display: none;
+}
+ul#edit_div_navigation
+{
+	list-style: none;
+	padding: 0px;
+	margin: 0px 0px 2px 0px;
+}
+ul#edit_div_navigation li
+{
+	display: inline;
+	border: none;
+	padding: 2px 5px;
+	margin-right: 3px;
+	-moz-border-radius-topleft: 5px;
+	-moz-border-radius-topright: 5px;
+	-webkit-border-top-left-radius: 5px;
+	-webkit-border-top-right-radius: 5px;
+	cursor: default;
+}
+ul#edit_div_navigation li.section_inactive
+{
+	font-weight: normal;
+	background-color: #b1b1b1;
+}
+ul#edit_div_navigation li.section_active
+{
+	font-weight: bold;
+	background-color: #e0e0e0;
+	border-bottom: 1px solid #e0e0e0;
+}
+#banner_selection_div
+{
+	z-index: 2;
+	width: 600px;
+	height: 80%;
+}
+#banner_selection_inner_div
+{
+	margin: 0px 12px;
+	width: 570px;
+	height: 78%;
+	overflow: auto;
+	background-color: #e0e0e0;
+	padding: 5px;
+}
+.banner_row
+{
+	cursor: pointer;
+}
+.banner_row label
+{
+	font-weight: bold;
+}
+span.marginLikeInput
+{
+	font-style: italic;
+	display: inline-block;
+	margin: 0px 5px 10px 12px;
+}
+a.simulateInputMargins
+{
+	display: inline-block;
+	margin-bottom: 10px;
+}
+/* End styles for the Fake Modal Dialogs */
+
+/* Styles for the BATEA logo */
+#logo
+{
+	margin: 30px auto;
+	height: 117px;
+	width: 365px;
+	border-top: 3px solid #e6e6e6;
+	border-left: 3px solid #e6e6e6;
+	border-bottom: 3px solid #9a9a9a;
+	border-right: 3px solid #9a9a9a;
+	
+}
+#business_name
+{
+	font-family: sans;
+	font-style: italic;
+	font-weight: bold;
+	text-transform: uppercase;
+	font-size: 3.1em;
+	line-height: .94em;
+}
+#logo_tag
+{
+	font-family: sans;
+	font-size: .85em;
+	padding-left: 3px;
+	
+}
+/* End style for the BATEA logo */
+/* Styles for the image gallery */
+.gallery_table
+{
+	width: 100%;
+	padding: 10px;
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+}
+.gallery_table a, .gallery_table a:visited
+{
+	color: #2e408d;
+	background-color: transparent;
+	text-decoration: none;
+	font-weight: bold;
+}
+.gallery_table img { vertical-align: middle; }
+.gallery_table img.img-picture { border: 1px solid #333333; }
+.gallery_table img.img-folder { border: 0px; }
+.gallery_table img.img-galicon { border: 1px solid #555555; }
+.gallery_table img.img-thumbnail { border: 1px solid #333333; }
+.gallery_table img.img-thumbnail-selected { border: 1px solid #8ca0bf; }
+.gallery_table img.img-picture-prev { border: 0px; }
+.gallery_table img.img-picture-next { border: 0px; }
+.gallery_table img.img-thmbnavi-prev { border: 0px; }
+.gallery_table img.img-thmbnavi-next { border: 0px; }
+.gallery_table img.img-new { border: 0px; }
+
+td.td-thumbnails-thumb
+{
+	padding: 5px;
+	font-family:  arial, verdana, helvetica, sans-serif;
+	color: #555555;
+	font-size: 8pt;
+	background-color: transparent;
+	white-space: nowrap;
+	vertical-align: bottom;
+	text-align: center;
+	border: 1px solid #ece9d8;
+}
+td.td-thumbnails-thumb:hover
+{
+	background-color: #F1E6A9;
+}
+table.table-galitem
+{
+	width: 100%;
+}
+td.td-galitem-icon
+{
+	padding-right: 10px;
+}
+td.td-galitem-title
+{
+	font-family:  arial, verdana, helvetica, sans-serif;
+	font-size: 9pt;
+	width: 100%;
+	text-align: left;
+	font-weight: bold;
+	color: #999999;
+}
+
+td.td-galitem-caption
+{
+	font-family:  arial, verdana, helvetica, sans-serif;
+	font-size: 8pt;
+	text-align: left;
+}
+table.table-picture
+{
+	width: 100%;
+	text-align: center;
+}
+td.td-picture-navi
+{
+	font-family:  arial, verdana, helvetica, sans-serif;
+	font-size: 10pt;
+	font-weight:  bold;
+	color: #000000;
+	text-align: center;
+	background-color: transparent;
+}
+td.td-zoom-factors
+{
+	padding: 3pt;
+	text-align: center;
+}
+input.button-zoom-factors
+{
+	border: 1px solid #777777; 
+	font-family:  arial, verdana, helvetica, sans-serif;
+	font-size:    9pt;
+	font-weight: bold;
+	color: #777777;
+	background-color: #dddddd;
+	text-align: center;
+}
+td.td-picture-pic {}
+td.td-picture-filename
+{
+	font-family:  arial, verdana, helvetica, sans-serif;
+	font-size: 8pt;
+	font-weight: bold;
+	text-align: center;
+	background-color: #ececec;
+	padding: 7px;
+	background-color: transparent;
+}
+td.td-picture-caption
+{
+	font-family:  arial, verdana, helvetica, sans-serif;
+	font-size: 8pt;
+	text-align: center;
+	background-color: #ececec;
+	padding: 7px;
+	background-color: transparent;
+}
+table.table-thumbnails
+{
+	margin-left: auto;
+	margin-right: auto;
+}
+
+td.td-thumbnails-navi
+{
+	color: #000000;
+	border-top: 2px solid #444444;
+	font-family: verdana, helvetica, arial, sans-serif;
+	font-size:	10pt;
+	font-weight:	bold;
+	text-align: right;
+	padding: 8px;
+}
+
+span.span-filters
+{
+	font-size: 8pt;
+	font-weight: normal;
+}
+div.div-galheader
+{
+	font-family:  arial, verdana, helvetica, sans-serif;
+	font-size:    10pt;
+	font-weight:  bold;
+	color: #000000;
+	margin-bottom: 20px;
+	padding: 1px;
+	width: 100%;
+	text-align: left;
+}
+table.table-shadows
+{
+	border-collapse: collapse;
+	margin: auto;
+	padding: 0px;
+}
+td.td-shadows-right
+{
+	background-image: url(../images/spgm/shadow_right.jpg);
+	background-position: top left;
+	background-repeat: no-repeat;
+	width: 20px;
+	margin: 0px;
+	padding: 0px;
+}
+td.td-thumbnails-thumb:hover td.td-shadows-right
+{
+	background-image: url(../images/spgm/shadow_right_hover.jpg);
+}
+td.td-shadows-bottom
+{
+	background-image: url(../images/spgm/shadow_bottom.jpg);
+	background-position: top left;
+	background-repeat: no-repeat;
+	height: 5px;
+	margin: 0px;
+	padding: 0px;
+}
+td.td-thumbnails-thumb:hover td.td-shadows-bottom
+{
+	background-image: url(../images/spgm/shadow_bottom_hover.jpg);
+}
+td.td-shadows-bottomright
+{
+	background-image: url(../images/spgm/shadow_bottomright.jpg);
+	background-position: top left;
+	background-repeat: no-repeat;
+	width: 20px;
+	margin: 0px;
+	padding: 0px;
+}
+td.td-thumbnails-thumb:hover td.td-shadows-bottomright
+{
+	background-image: url(../images/spgm/shadow_bottomright_hover.jpg);
+}
+td.td-shadows-main
+{
+	margin: 0px;
+	padding: 0px;
+}
+a.gallery_image_control
+{
+}
+a.gallery_image_control img
+{
+	border: none;
+}
+.gallery_image_delete
+{
+	height: 16px; /* height of the 'delete.png' image */
+	margin: 0 auto;
+	padding-bottom: 2px
+}
+td.td-thumbnails-thumb:hover .gallery_image_delete
+{
+	background: url(../images/delete.png) no-repeat top right;
+	margin: 0 auto;
+	padding-bottom: 2px;
+}
+/* End styles for the image gallery */
+
+/* Styles for the "orderby" select control */
+.orderby_div
+{
+	text-align: right;
+}
+/* End "orderby" select control styles*/
+
+/* Pagination styles */
+.contentTable .addendum_tr td, .contentTable .addendum_tr:hover td
+{
+	background-color: #ece9d8;
+}
+.contentTable .addendum_td
+{
+	border: none;
+}
+.paging_div
+{
+	padding: 2px;
+}
+.paging_div ul
+{
+	margin: 0;
+	padding: 0;
+	text-align: right;
+	font-size: 14px;	
+}
+.paging_div li
+{
+	list-style-type: none;
+	display: inline;
+	padding-bottom: 1px;
+}
+.paging_div a, .paging_div a:visited
+{
+	padding: 0 5px;
+	border: 1px solid #9aafe5;
+	text-decoration: none;
+	color: #2e6ab1;
+}
+.paging_div a:hover, .paging_div a:active
+{
+	border: 1px solid #2b66a5;
+	/* color: #000; */
+	/*background-color: #ffff80; */
+	background-color: #2e6ab1;
+	color: #fff;
+}
+.paging_div a.currentpage
+{
+	background-color: #2e6ab1;
+	color: #fff !important;
+	border-color: #2b66a5;
+	font-weight: bold;
+	cursor: default;
+}
+.paging_div a.disablelink, .paging_div a.disablelink:hover
+{
+	background-color: #ece9d8;
+	cursor: default;
+	color: #929292;
+	border-color: #929292;
+	font-weight: normal !important;
+}
+.paging_div a.prevnext
+{
+	font-weight: bold;
+}
+/* End Pagination styles */
+
+/* Legend styles */
+#legend_wrap
+{
+	cursor: pointer;
+	position: absolute;
+}
+#legendContent
+{
+	position: relative;
+	display: none;
+	height: 1.2em;
+}
+#legendControlWrap
+{
+	position: absolute;
+}
+#legend_ul
+{
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+#legend_ul li
+{
+	display: inline;
+	padding: 0 2px;
+}
+.legend_good, .contentTable tr.legend_good td
+{
+	background-color: #fff;
+}
+.legend_bad, .contentTable tr.legend_bad td
+{
+	background-color: #ff0000;
+}
+.legend_maybe, .contentTable tr.legend_maybe td
+{
+	background-color: #ffff00;
+}
+.legend_invalid, .contentTable tr.legend_invalid td
+{
+	background-color: #ff5555;
+}
+.legend_waiting, .contentTable tr.legend_waiting td
+{
+	background-color: #00ff00;
+}
+.legend_unknownstatus, .contentTable tr.legend_unknownstatus td
+{
+	background-color: #f57008;
+}
+.legend_expired, .contentTable tr.legend_expired td
+{
+	background-color: #7c7c85;
+}
+/* End Legend styles */
+/* Configuration form styles */
+div.configuration_form ul
+{
+	list-style-type: none;
+	margin: 5px;
+	padding: 0;
+}
+div.configuration_form ul li
+{
+	font-weight: bold;
+	color: #fff;
+	margin-bottom: .5em;
+	background: url('/newadmin/images/title_gradient.gif') repeat-x top left;
+}
+div.configuration_form ul li a, div.configuration_form ul li a:visited, div.configuration_form ul li a:hover
+{
+	display: block;
+	padding: 0px 5px;
+	color: #fff;
+	text-decoration: none;
+}
+div.configuration_form ul div
+{
+	font-size: 85%;
+	padding: 0 1em .5em 1em;
+}
+div.configuration_form ul label
+{
+	display: block;
+	float: left;
+	width: 50%;
+}
+div.configuration_form input.text, div.configuration_form input.integer, div.configuration_form input.submit, div.configuration_form select
+{
+	float: right;
+}
+div.configuration_form input.text
+{
+	width: 40%;
+}
+div.configuration_form input.integer
+{
+	width: 40%;
+	text-align: right;
+}
+div.configuration_form input.submit
+{
+	margin-top: 5px;
+}
+/* End configuration form styles */

@@ -1,0 +1,1 @@
+If used, do not forget to update the charset to big5 (charset=big5) in index.php, or in your root page.

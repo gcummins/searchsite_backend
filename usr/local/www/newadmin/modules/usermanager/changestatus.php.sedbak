@@ -1,0 +1,134 @@
+<?php
+
+require_once "../includes/backend_requirements.php";
+
+// Determine how we have been called
+if (isset($_GET) && isset($_GET['ak']))
+{
+	// Called via direct HTTP request
+	// We will need to return the user to the calling page
+	if (array_key_exists('module', $_GET))
+	{
+		$module = $_GET['module'];
+	}
+	else
+	{
+		$module = null;
+	}
+	
+	$callingMethod = 'get';
+}
+elseif (isset($_POST) && isset($_POST['ak']))
+{
+	// Called via an AJAX backend connection
+	
+	$callingMethod = 'post';
+}
+else
+{
+	returnError(100, "Invalid Invocation Method");
+	die();
+}
+
+// Ensure that the correct parameters have been passed
+// This script requires a uid and a status.
+// We will check the status against the user's status in the database,
+// and alter it to match the requested status.
+// This allows users to be enabled and disabled.
+
+if (isset($_REQUEST['uid']) && !empty($_REQUEST['uid']))
+{
+	if ((int)$_REQUEST['uid'] > 0)
+	{
+		$uid = (int)$_REQUEST['uid'];
+	}
+	else
+	{
+		returnError(201, "UID is invalid.", true);
+		returnToMainPage();
+		exit();
+	}
+}
+else
+{
+	returnError(200, "The parameter 'uid' must be provided.", true);
+}
+
+if (array_key_exists('status', $_REQUEST))
+{
+	if ($_REQUEST['status'] == '1' || $_REQUEST['status'] == '0')
+	{
+		if ($_REQUEST['status'] == '1')
+		{
+			$newStatus = 0;
+		}
+		else
+		{
+			$newStatus = 1;
+		}
+		
+		// We cannot change the current logged in user, so make sure the user we are altering is
+		// not the one that is logged in.
+		if ($_SESSION['userid'] == $uid)
+		{
+			returnError(101, "You cannot change the status of an account while using that account.");
+		}
+		else
+		{
+			$query = "UPDATE users SET enabled=$newStatus WHERE id=$uid;";
+			if (false === mysql_query($query, $adminLink))
+			{
+				returnError(902, $query, true, $adminLink);
+				returnToMainPage();
+				exit();
+			}
+			
+			$statusString = ($newStatus) ? 'enabled' : 'disabled';
+			
+			// Get the username of the account that was changed
+			$query = "SELECT username FROM users WHERE id=$uid LIMIT 1;";
+			if (false === ($usernameResult = mysql_query($query, $adminLink)))
+			{
+				returnError(902, $query, true, $adminLink);
+				returnToMainPage();
+				exit();
+			}
+			$usernameRow = mysql_fetch_object($usernameResult);
+			
+			if ($newStatus == 0)
+			{
+				$logMessage = "Disabled user '" . $usernameRow->username . "'";
+			}
+			else
+			{
+				$logMessage = "Enabled user '" . $usernameRow->username . "'";
+			}
+			returnMessage(1001, $logMessage, false);
+			
+			//logNotice('User Status Change', '\'' . $usernameRow->username . '\' was ' . $statusString . '.', $_SERVER['REQUEST_URI'] . $_SERVER['QUERY_STRING'], $module);
+			
+			if ($callingMethod == 'get')
+			{
+				header("Location: " . ADMIN_PATH . "?module=$module");
+				exit();
+			}
+			elseif ($callingMethod == 'post')
+			{
+				echo '0'; // Send a "successful" response to the calling script
+				exit();
+			}
+		}
+	}
+	else
+	{
+		returnError(201, "Status is invalid.");
+	}
+}
+else
+{
+	returnError(200, "The parameter 'status' must be provided.");
+}
+
+
+
+?>

@@ -1,0 +1,40 @@
+/* Override the styles from the master CSS file */
+#pagecontent h3
+{
+	margin-left: 5px;
+	margin-right: 5px;
+}
+#pagecontent form
+{
+	width: 100%;
+	margin: 5px;
+}
+#pagecontent form input, #pagecontent form label
+{
+	width: auto;
+	float: none;
+	display: inline;
+	text-align: left;
+	margin: 0px;
+}
+/* End of override */
+.menu_section_label
+{
+	font-weight: bold;
+}	
+#pagecontent form input.module_checkbox
+{
+	margin-left: 30px;
+}
+#pagecontent form input.checkbox_first
+{
+	margin-left: 60px;
+}
+.menu_permissions
+{
+	display: inline;
+}
+span.hidden
+{
+	display: none;
+}

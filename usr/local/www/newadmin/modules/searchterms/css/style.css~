@@ -1,0 +1,12 @@
+table.contentTable tr#defaultcursor:hover td
+{
+	cursor: default;
+}
+#searchterm_parameters
+{
+	text-align: right;
+}
+#searchterm_parameters form label
+{
+	width: 200px;
+}

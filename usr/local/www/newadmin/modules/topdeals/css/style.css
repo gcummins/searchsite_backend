@@ -1,0 +1,87 @@
+.contentTable .imagead_cell
+{
+	text-align: center;
+}
+#confirm_delete_div
+{
+	width: 400px;
+	border-top: 6px solid #ababab;
+	border-left: 6px solid #ababab;
+	border-right: 6px solid #5c5959;
+	border-bottom: 6px solid #5c5959;
+	top: 150px;
+	left: 40%;
+	position: fixed;
+	background: gray;
+	filter:alpha(opacity=95);-moz-opacity:.95;opacity:.95;
+	padding: 0px 0px 10px 5px;
+	display: none;
+}
+#confirm_delete_image_div
+{
+	float: left;
+	width: 135px;
+	height: 135px;
+}
+#confirm_delete_image_div img
+{
+	margin: 10px 10px 5px 5px;
+}
+#topdeals_legend_div
+{
+	float: right;
+	padding: 5px;
+	border-left: 1px solid;
+	border-bottom: 1px solid;
+	background-color: #e6e6e6;
+}
+#topdeals_legend_div h3
+{
+	text-align: center;
+	margin-top: 0;
+	padding-top: 0;
+}
+ul#legend
+{
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+ul#legend li
+{
+	margin-right: 10px;
+}
+ul#legend li span.legend_ad_disabled
+{
+	background-color: #c9c2c2;
+}
+ul#legend li span.legend_ad_active
+{
+	color: green;
+}
+ul#legend li span.legend_ad_expired
+{
+	color: red;
+}
+ul#legend li span.legend_ad_upcoming
+{
+	color: #00ceff;
+}
+#editDivImage_td
+{
+	padding-left: 12px;
+}
+.form_button_div
+{
+	padding-right: 12px;
+}
+#pagecontent form input.radiobutton
+{
+	border: 1px solid gray;
+	width: 13px;
+}
+td.uparrow, td.downarrow
+{
+	width: 10%;
+}

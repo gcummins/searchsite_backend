@@ -1,0 +1,43 @@
+README file for thumbnails_creation.sh
+
+- thumbnails_creation.sh -
+
+   Author: Nicolas Stroppa
+
+
+This script automates thumbnail generation under Unix-like systems.
+It requires convert program (part of the ImageMagick package)
+and bash version must be >= 2.02.
+
+It generates a thumbnail for every image file located
+in the chosen directories.
+You can choose the size of the generated thumbnails by giving:
+- a ratio, e.g.  r:30 (percentage);
+- a width, e.g.  w:567 (pixels);
+- a height, e.g.  h:34 (pixels).
+
+If the recursive mode is activated, then every sub-directory is
+processed recursively.
+
+You can also choose the prefix of the generated thumbnails.
+
+Try "thumbnails_creation.sh --help" for a list of options.
+
+
+EXAMPLES:
+thumbnails_creation.sh --prefix _thumb_ --size r:25 -R dir/
+thumbnails_creation.sh --size h:634 dir1/ dir2/
+
+default values:
+- prefix: _thb_
+- dir: . (current directory)
+- size: r:20 (20% ratio)
+
+
+
+NOTE:
+This script has been tested under SunOS 5.8 and Linux Mandrake 9.1
+in both cases with GNU bash 2.05.
+It should work on every Unix-like system with GNU bash version 2.02
+and posterior (it does not work with bash 2.01 because of
+the [[...]] construction).

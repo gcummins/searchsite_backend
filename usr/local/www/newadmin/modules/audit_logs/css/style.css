@@ -1,0 +1,202 @@
+h3
+{
+	margin-left: 3px;
+}
+#audit_log_container p, #audit_log_container ul
+{
+	margin: 0px;
+	padding: 0px;
+}
+#audit_log_mainmenu
+{
+	width: 29%;
+	height: 422px;
+	padding: 10px;
+}
+#audit_log_mainmenu h4
+{
+	margin: 0px;
+	padding: 0px;
+}
+#audit_log_mainmenu fieldset legend
+{
+	font-weight: bold;
+}
+#audit_log_mainmenu fieldset .fullwidth
+{
+	width: 100%;
+}
+#audit_log_mainmenu input.button
+{
+	float: right;
+	margin-top: 12px;
+}
+#audit_log_mainmenu form
+{
+	width: auto;
+	margin: 0px;
+}
+#audit_log_mainmenu form p
+{
+	margin-left: 25px;
+}
+#audit_log_mainmenu a
+{
+	color: blue;
+}
+#audit_log_detail_container
+{
+	width: 68%;
+	float: right;
+	border-left: 2px solid #000;
+}
+#audit_log_detail_container div
+{
+	height: 200px;
+	overflow: auto;
+}
+#audit_log_entries
+{
+	border-bottom: 1px solid #000;
+}
+#audit_log_entries div
+{
+	overflow: visible;
+}
+div.loading_image
+{
+	padding-top: 20px;
+	text-align: center;
+}
+#audit_log_detail
+{
+	padding: 10px;
+	border-top: 1px solid #000;
+}
+#audit_log_detail label
+{
+	font-weight: bold;
+	display: block;
+	float: left;
+	width:7em;
+}
+#audit_log_detail span
+{
+	display: block;
+	margin-left: 7em;
+	white-space: normal;
+}
+ul
+{
+	list-style: none;
+}
+.table_logentries
+{
+	width: 100%;
+	white-space: nowrap;
+}
+.table_logentries tr
+{
+	cursor: pointer;
+}
+.table_logentries th
+{
+	display: none;
+	cursor: default;
+	border: 1px solid;
+	border-top: 1px solid #DBD9D9;
+	border-left: 1px solid #DBD9D9;
+	background-color: #b1b1b1;
+	text-align: left;
+}
+.table_logentries td
+{
+	padding: 0px 5px;
+}
+.table_logentries tr.notice
+{
+	/*background-color: #d5ffad;*/
+	background-color: #bcd5ff;
+}
+.table_logentries tr.notice:hover
+{
+	/*background-color: #c3fbfa;*/
+	background-color: #6DA3FF;
+}
+.table_logentries tr.error
+{
+	/*background-color: #ffb0b0;*/
+	background-color: #FFAA57;
+}
+.table_logentries tr.error:hover
+{
+	/*background-color: #FF74B3;*/
+	background-color: #FF8916;
+}
+#al_mainmenu_quicklinks, #al_mainmenu_daterange
+{
+	margin-bottom: 10px;
+}
+#al_mainmenu_daterange input.button
+{
+	margin-top: 1em;
+}
+.audit_log_section
+{
+	border: 1px solid;
+	background-color: #aca899;
+	background-repeat: no-repeat;
+	width: 100%;
+	cursor: pointer;
+	margin-bottom: 10px;
+}
+.audit_log_section span
+{
+	display: block;
+	color: #fff;
+	font-weight: bold;
+	border-bottom: 1px solid #000;
+	background-color: #225dc6;
+}
+.audit_log_section img
+{
+	margin: 10px 5px;
+	float: left;
+}
+.audit_log_section p
+{
+	height: 2.5em;
+}
+.audit_log_section_container
+{
+	width: 40%;
+}
+div.left
+{
+	margin: 10px 0px 0px 10px;
+	float: left;
+}
+div.right
+{
+	margin: 10px 10px 0px 48%;
+}
+#delete_entries
+{
+	display: none;
+}
+#delete_entries a
+{
+	display: block;
+	background-color: red;
+	border: 1px solid #A10000;
+	border-top: 1px solid #DBD9D9;
+	border-left: 1px solid #DBD9D9;
+	font-weight: bold;
+	color: #fff;
+	text-align: center;
+	text-decoration: none;
+}
+#delete_entries a:hover
+{
+	color: #e6e6e6;
+}

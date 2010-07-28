@@ -1,0 +1,332 @@
+html,body
+{
+	margin: 0;
+	padding: 0;
+	font-family: Arial, Verdana, sans;
+	font-size: 95%;
+	color: #000;
+	height: 100%;
+}
+.bodytable
+{
+	border-collapse: collapse;
+	border-spacing: 0px;
+	padding: 0px;
+	margin: 0;
+	background-color: #606060;
+	width: 100%;
+	border: none;
+}
+.bodytable tr
+{
+	padding: 0;
+}
+.bodytable td
+{
+	padding: 0;
+}
+#bluebar
+{
+	width: 100%;
+	background-repeat: repeat-x;
+	padding: 0;
+	margin: 0;
+	height: 30px;
+}
+#bluebar a
+{
+	border: none;
+	text-decoration: none;
+}
+#bluebar a img
+{
+	border: none;
+}
+#bluebar span#bluebar_title
+{
+	color: #fff;
+	font-weight: bold;
+	position: absolute;
+	margin: 5px 0 0 0;
+	padding: 0;
+}
+#bluebar img#bluebar_close
+{
+	padding: 0 3px;
+	float: right;
+}
+#bluebar img#bluebar_question
+{
+	padding: 0 3px; 
+	float: right;
+}
+#td_leftbar_container
+{
+	height: 100%;
+	border-right: 1px solid #000;
+}
+table#leftbar
+{
+	height: 100%;
+	width: 159px;
+	visibility: hidden;
+	border-collapse: collapse;
+	padding: 0px;
+	border-spacing: 0px;
+	font-size: 12px;
+}
+table#leftbar tr
+{
+	background-color: #606060;
+	padding: 0;
+}
+table#leftbar td
+{
+	padding: 0;
+}
+table#leftbar tr td.menuHeading
+{
+	font-size: 16px;
+	height: 25px;
+}
+table#leftbar tr td span.section_title
+{
+	display: block;
+	background-color: #c0c0c0;
+	border-top: 3px solid #e3e3e3;
+	border-left: 3px solid #e3e3e3;
+	border-bottom: 3px solid #7d7d7d;
+	border-right: 3px solid #7d7d7d;
+	text-align: center;
+	cursor: default;
+}
+#activeSubMenu
+{
+	padding: 0;
+	margin: 0;
+}
+ul#activeSubMenuList
+{
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	width: 100%;
+}
+ul#activeSubMenuList li
+{
+	color: #fff;
+	height: 47px;
+	border: 1px solid #606060;
+	margin: 0 0 10px 0;
+	font-size: 15px;
+	cursor: pointer;
+}
+ul#activeSubMenuList li span
+{
+	display: block;
+	text-align: center;
+	height: 47px;
+	margin: 32px 0 0 0;
+}
+ul#activeSubMenuList li:hover span
+{
+	font-weight: bold;
+}
+#scrollUpDiv
+{
+	position: absolute;
+	left: 134px;
+}
+#scrollDownDiv
+{
+	position: absolute;
+	left: 134px;
+}
+#ScrollContainer
+{
+	overflow: hidden;
+	position: relative;
+	/*height: 715px;*/
+	/* This height needs to be set dynamically based on the screen real-estate available and the
+	   number of module sections displayed in the leftbar */
+	height: 450px;
+}
+#activeSubMenu
+{
+	width: 100%;
+}
+#pagecontent
+{
+	width: 100%;
+	background-color: #fffccc;
+}
+#pagecontent form
+{
+	width: 390px;
+	margin: 20px auto;
+}
+#pagecontent form h3
+{
+	text-align: center;
+}
+#pagecontent form label
+{
+	float: left;
+	display: block;
+	text-align: right;
+	width: 125px;
+	margin-right: 10px;
+}
+#pagecontent form input.formtext
+{
+	float: left;
+	width: 225px;
+}
+#pagecontent form input.checkbox
+{
+	width: 13px;
+}
+#pagecontent form br
+{
+	clear: left;
+}
+.contentTable
+{
+	margin: 20px auto;
+	border-spacing: 0px;
+	border-collapse: collapse;
+	font-size: 85%;
+}
+.contentTable a
+{
+	text-decoration: none;
+	color: blue; /* Make sure the links are always blue, whether visited or not */
+}
+.contentTable a:hover
+{
+	text-decoration: underline;
+}
+
+.contentTable td, .contentTable th
+{
+	border: 1px solid #000;
+	background-color: #d6dff7;
+	padding: 2px 3px;
+}
+
+.contentTable td
+{
+	background-color: #fff;
+}
+.contentTable tr:hover td
+{
+	background-color: #d6dff7;
+	cursor: pointer;
+}
+
+.contentTable tr.table_titlebar td
+{
+	background-color: #225dc6;
+	color: #fff;
+	font-weight: bold;
+	cursor: text;
+	padding: 3px;
+}
+
+.contentTable tr.table_titlebar td span.title_detail
+{
+	font-weight: normal;
+}
+
+.contentTable tr.table_titlebar td span.title_link a
+{
+	float: right;
+	color: #fff;
+	text-decoration: none;
+}
+#errorPane
+{
+	color: #8b0000;
+	display: none;
+	font-weight: bold;
+	background-color: #ff8888;
+	text-align: center;
+	background-repeat: repeat-x;
+	background-position: bottom left;
+}
+#errorPane p
+{
+	margin: 0;
+	padding: 15px 15px 5px 15px;
+}
+#errorPane.information
+{
+	color: #41763a;
+	background-color: #9cf390;
+}
+#errorPane span#errorLeftCorner, #errorPane span#errorRightCorner
+{
+	display: block;
+	position: relative;
+	left: 0;
+	bottom: 0;
+	height: 20px;
+	width: 20px;
+	background-repeat: no-repeat;
+	background-position: top left;
+}
+#errorPane span#errorRightCorner
+{
+	float: right;
+}
+/* Styles for the Audit Log module */
+/*
+Commented, and added in the Audit Log module
+#treeDiv
+{
+	height: 100%;
+	width: 300px;
+	/*background-color: #e6e6e6;*/
+	float: left;
+}
+#logEntryDiv
+{
+	height: 100%;
+	margin: 30px 0 0 315px;
+	/*background-color: yellow;*/
+}
+#logEntryDiv label
+{
+	font-weight: bold;
+	display: block;
+	width: 8em;
+	float: left;
+}
+*/
+/* End styles for Audit Log */
+
+/* Styles for the BATEA logo */
+#logo
+{
+	margin: 30px auto;
+	height: 61px;
+	padding-left: 30px;
+	width: 11em;
+}
+#business_name
+{
+	font-family: sans;
+	font-style: italic;
+	font-weight: bold;
+	text-transform: uppercase;
+	font-size: 3.1em;
+	line-height: .94em;
+}
+#logo_tag
+{
+	font-family: sans;
+	font-size: .85em;
+	padding-left: 3px;
+	
+}
+/* End style for the BATEA logo */

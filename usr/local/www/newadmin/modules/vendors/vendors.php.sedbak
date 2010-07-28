@@ -1,0 +1,189 @@
+<?php
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+$task = getTask();
+
+switch ($task)
+{
+	default:
+		showTable();
+		break;
+}
+
+function showTable()
+{
+	// Show a paginated list of all vendors
+	
+	global $adminLink, $dealhuntingLink, $module;
+	
+	returnMessage(1000, VIEWED_MAIN_PAGE, false);
+
+	// By default, we will use the DATAFEEDS database. However, this script will double
+	// as the feed maintenance for the search site. We need to determine which module was
+	// used to access this script, and change the database name accordingly.
+	$feedDatabase = DEALHUNTING_DATAFEEDS_DATABASE; // Defined in configuration.php
+	if ($module)
+	{
+		$query = "SELECT `display_name` FROM `modules` WHERE `id`=$module LIMIT 1;";
+		$result = mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+		
+		if (mysql_num_rows($result))
+		{
+			$row = mysql_fetch_object($result);
+			
+			$substResult = stristr($row->display_name, 'Search Site');		
+			if (!empty($substResult))
+			{
+				$feedDatabase = DEALHUNTING_SEARCHSITE_DATABASE;
+			}
+		}
+	}
+	
+	if (isset($_REQUEST['paging_orderby']) && !empty($_REQUEST['paging_orderby']))
+	{
+		switch ($_REQUEST['paging_orderby'])
+		{
+			case 'lastupdate':
+				$orderbyString = "ORDER BY `vardatetime` DESC";
+				break;
+			case 'lastupdates':
+				$orderbyString = "ORDER BY `vardatetime` ASC";
+				break;
+			case 'filetype':
+				$orderbyString = "ORDER BY `file` DESC";
+				break;
+			case 'norecs':
+				$orderbyString = "ORDER BY `norecs` DESC";
+				break;
+			case 'norecsd':
+				$orderbyString = "ORDER BY `norecs` ASC";
+				break;
+			case 'company':
+			default:
+				$orderbyString = "ORDER BY `compname` ASC";
+				break;
+		}
+	}
+	else
+	{
+		$orderbyString = "ORDER BY `compname` ASC";
+	}
+	
+	// Get a count of all available vendors
+	$rowCountQuery = "SELECT count(*) as count FROM `$feedDatabase`.`compchecker`;";
+	if (false === ($rowCountResult = mysql_query($rowCountQuery, $adminLink)))
+	{
+		returnError(902, $rowCountQuery, true, $adminLink);
+	}
+	list($rowCount) = mysql_fetch_row($rowCountResult);
+	
+	// Include the pagination class
+	include_once "includes/pagination.class.php";
+	
+	$paginator = new Pagination($module, $rowCount);
+	
+	// Get the table rows
+	$query = "SELECT"
+		. " `id`, `compname`, `vardatetime`, `norecs`, `file`"
+		. " FROM `$feedDatabase`.`compchecker`"
+		. " $orderbyString " . $paginator->getLimitString();
+	
+	if (false === ($result = mysql_query($query, $dealhuntingLink)))
+	{
+		returnError(902, $query, true, $dealhuntingLink);
+	}
+	
+	// Include the table-creation class
+	include_once "includes/pageContentTable.class.php";
+	
+	$arrDataRows = array();
+	while (false !== ($row = mysql_fetch_object($result)))
+	{
+		$arrDataRows[] = array('', array(
+			array('', htmlspecialchars($row->compname)),
+			array('', date('m/d/Y H:i:s', $row->vardatetime)),
+			array('', getFileType($row->file)),
+			array('', (int)$row->norecs)
+		));
+	}
+	
+	// Set the table action
+	$action = '';
+	
+	// Create the select control
+	$selectControlString  = "<div class=\"orderby_div\">";
+	$selectControlString .= "\nSort By: <select name=\"paging_orderby\" onchange=\"loadSortOrder(this, '" . ADMINPANEL_WEB_PATH . "', $module);\">\n";
+	$selectControlString .= "\t<option value=\"company\" ";
+	if ($paginator->orderby == "company")
+	{
+		$selectControlString .= "selected=\"selected\"";
+	}
+	$selectControlString .= ">Company (ascending)</option>\n";
+	$selectControlString .= "\t<option value=\"lastupdate\" ";
+	if ($paginator->orderby == "lastupdate")
+	{
+		$selectControlString .= "selected=\"selected\"";
+	}
+	$selectControlString .= ">Last Update (newest first)</option>\n";
+	$selectControlString .= "\t<option value=\"lastupdates\" ";
+	if ($paginator->orderby == "lastupdates")
+	{
+		$selectControlString .= "selected=\"selected\"";
+	}
+	$selectControlString .= ">Last Update (oldest first)</option>\n";
+	$selectControlString .= "\t<option value=\"filetype\" ";
+	if ($paginator->orderby == "filetype")
+	{
+		$selectControlString .= "selected=\"selected\"";
+	}
+	$selectControlString .= ">File Type</option>\n";
+	$selectControlString .= "\t<option value=\"norecs\" ";
+	if ($paginator->orderby == "norecs")
+	{
+		$selectControlString .= "selected=\"selected\"";
+	}
+	$selectControlString .= ">Products (high to low)</option>\n";
+	$selectControlString .= "\t<option value=\"norecsd\" ";
+	if ($paginator->orderby == "norecsd")
+	{
+		$selectControlString .= "selected=\"selected\"";
+	}
+	$selectControlString .= ">Products (low to high)</option>\n";
+	$selectControlString .= "</select></div>\n";
+	
+	// Create an array to hold the "addendum" to the table
+	$arrAddendum = array(
+		$selectControlString,
+		$paginator->generateLinkBar()
+	);
+	
+	// Create the table
+	$theTable = new pageContentTable('Data Feeds', array('Company', 'Last Update', 'File Type', 'Products'), '', $action, $arrDataRows, $arrAddendum);
+	
+	if ($theTable->error())
+	{
+		returnError(301, $theTable->error(), true);
+	}
+	else
+	{
+		echo $theTable->createTable();
+	}
+}
+
+function getFileType($fileTypeNumber)
+{
+	if (defined('DEALHUNTING_FEED_TYPE_'.$fileTypeNumber)) // Defined in configuration.php
+	{
+		return constant('DEALHUNTING_FEED_TYPE_'.$fileTypeNumber);
+	}
+	else
+	{
+		return $fileTypeNumber;
+	}
+}
+?>

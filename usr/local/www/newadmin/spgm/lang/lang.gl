@@ -1,0 +1,45 @@
+<?php
+
+# Language Pack by Patricia Saco [patriciasaco.com] 25.11.06 Language: galego
+# utopia@patriciasaco.com
+
+# link to SPGM - hipervínculo a SPGM
+$spgm_cfg['locale']['spgmLink'] = 'galería xenerada por >SPGM_LINK<';
+
+# thumbnails navi bar - barra de navegación de previsualizacións
+$spgm_cfg['locale']['thumbnailNaviBar']  = 'Páxina >CURRENT_PAGE< de >NB_PAGES<';
+
+# filter label - etiqueta de filtro
+$spgm_cfg['locale']['filter'] = 'filtro';
+
+# filter value for 'new pictures' - valor do filtro para 'novas fotos'
+$spgm_cfg['locale']['filterNew'] = 'novas';
+
+# filter value for 'all pictures' - valor do filtro para 'tódalas fotos'
+$spgm_cfg['locale']['filterAll'] = 'todas';
+
+# filter value for 'slideshow' - valor para 'pase de diapositivas'
+$spgm_cfg['locale']['filterSlideshow'] = 'presentación de imaxes';
+
+# pictures navi bar - barra de navegación de fotos
+$spgm_cfg['locale']['pictureNaviBar'] = 'Imaxe >CURRENT_PIC< de >NB_PICS<';
+
+# picture label (as in '1 picture') - etiqueta de foto (en singular, como en '1 foto')
+$spgm_cfg['locale']['picture'] = 'foto';
+
+# pictures label (as in '2 pictures') - etiqueta de fotos (en plural, como en '2 fotos')
+$spgm_cfg['locale']['pictures'] = 'fotos';
+
+# new picture label (as in '1 new picture') - etiqueta de foto nova (en singular, como en '1 foto nova')
+$spgm_cfg['locale']['newPicture'] = 'foto nova';
+
+# new pictures label (as in '2 new pictures') - etiqueta de fotos novas (en plural, como en '2 fotos novas')
+$spgm_cfg['locale']['newPictures'] = 'fotos novas';
+
+# new gallery label - etiqueta de 'nova galería'
+$spgm_cfg['locale']['newGallery'] = 'nova galería';
+
+# main gallery label - etiqueta de galería principal
+$spgm_cfg['locale']['rootGallery'] = 'Galería Principal';
+
+?>

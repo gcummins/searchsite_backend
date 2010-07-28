@@ -1,0 +1,13 @@
+function changeStatus(userId, currentStatus, adminPath, module)
+{
+	location.href = adminPath + '/modules/usermanager/changestatus.php?ak=0&uid='+userId+'&status='+currentStatus+'&module=' + module;
+}
+function confirmDelete(userId, username)
+{
+	answer = confirm("Are you sure you wish to delete the account for '" + username +"'?");
+	
+	if (answer)
+	{
+		location.href = '<?php echo ADMIN_PATH; ?>/index.php?ak=1&module=<?php echo $module; ?>&task=delete&uid='+userId;
+	}
+}

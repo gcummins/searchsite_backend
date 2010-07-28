@@ -1,0 +1,152 @@
+<?php
+
+// Make sure this script is not called directly
+if (!defined('APP_NAME'))
+{
+	die("This script cannot be accessed directly.");
+}
+
+define('SEARCHTERMS_DEFAULT_RECORD_COUNT', 1000);
+
+$task = false;
+if (isset($_REQUEST['task']) && !empty($_REQUEST['task']))
+{
+	$task = $_REQUEST['task'];
+}
+
+switch ($task)
+{
+	default:
+		showTable();
+		break;
+}
+
+function showTable()
+{
+	global $dealhuntingLink;
+	
+	if (isset($_REQUEST['paging_orderby']) && !empty($_REQUEST['paging_orderby']))
+	{
+		switch($_REQUEST['paging_orderby'])
+		{
+			case 'hit':
+				$orderbystring = " ORDER BY hit DESC";
+				break;
+			case 'num':
+				$orderbystring = " ORDER BY num DESC";
+				break;
+			case 'term':
+			default:
+				$orderbystring = " ORDER BY term";
+				break;
+		}
+	}
+	else
+	{
+		$orderbystring =  "ORDER BY term";
+	}
+	
+	$view = "all";
+	$viewstring = "";
+	$groupbystring = " GROUP BY term,hit";
+	if (isset($_REQUEST['viewrecords']) && !empty($_REQUEST['viewrecords']))
+	{
+		switch ($_REQUEST['viewrecords'])
+		{
+			case 'misses':
+				$view = "misses";
+				$viewstring = " WHERE hit=0";
+				$groupbystring = " GROUP BY term";
+				break;
+			case 'hits':
+				$view = "hits";
+				$viewstring = " WHERE hit=1";
+				$groupbystring = " GROUP BY term";
+				break;
+			case 'all':
+			default:
+				$view = "all";
+				$viewstring = "";
+				$groupbystring = " GROUP BY term, hit";
+				break;
+		}
+	}
+	
+	$rowCountQuery = "SELECT count(*) as count FROM " . DEALHUNTING_SEARCHTERMS_TABLE . ";";
+	if (false === ($rowCountResult = mysql_query($rowCountQuery, $dealhuntingLink)))
+	{
+		returnError(902, $rowCountQuery, true, $dealhuntingLink);
+	}
+	
+	$recordCount = SEARCHTERMS_DEFAULT_RECORD_COUNT;
+	$recordCountString = " LIMIT $recordCount";
+	if (isset($_REQUEST['recordcount']) && is_numeric($_REQUEST['recordcount']))
+	{
+		$recordCount = abs($_REQUEST['recordcount']);
+		if ($recordCount < 1)
+		{
+			$recordCount = SEARCHTERMS_DEFAULT_RECORD_COUNT;
+		}
+		$recordCountString = " LIMIT $recordCount";
+	}
+	elseif (isset($_REQUEST['recordcount']) && ($_REQUEST['recordcount'] == 'all'))
+	{
+		$recordCount = "all";
+		$recordCountString = "";
+	}
+	
+	// Assemble the query string
+	$query = "SELECT DISTINCT term, hit, count(hit) as num FROM " . DEALHUNTING_DB_NAME . "." . DEALHUNTING_SEARCHTERMS_TABLE . $viewstring . $groupbystring . $sortbystring . $recordCountString . ";";
+	
+	$result = mysql_query($query, $adminLink) or returnError(902, $query, true, $adminLink);
+	
+	
+	?>
+	<div id="searchterm_parameters">
+	<form action="<?php echo $_SERVER['PHP_SELF']  . "?module=$module"; ?>" method="post">
+	<label for="sortby">Sort By:</label>
+	<select name="sortby">
+		<option value="term" <?php echo ($sortby == "term") ? "selected" : ""; ?>>Search Term</option>
+		<option value="hit" <?php echo ($sortby == "hit") ? "selected" : ""; ?>>Hit</option>
+		<option value="num" <?php echo ($sortby == "num") ? "selected" : ""; ?>>Count</option>
+	</select><br />
+	<label for="viewrecords">View:</label>
+	<select name="viewrecords">
+		<option value="all" <?php echo ($view == "all") ? "selected" : ""; ?>>All</option>
+		<option value="hits" <?php echo ($view == "hits") ? "selected" : ""; ?>>Hits</option>
+		<option value="misses" <?php echo ($view == "misses") ? "selected" : ""; ?>>Misses</option>
+	</select><br />
+	<label for="recordcount">Number of Records:</label>
+	<input type="text" name="recordcount" value="<?php echo $recordCount; ?>" size=6 class="alignright" /><br />
+	<input type="submit" value="Submit" />
+	</form>
+	</div>
+	
+		<table class="contentTable">
+			<tr class="table_titlebar">
+				<td colspan=3>Search Terms</td>
+			</tr>
+			<tr>
+				<th>Search Term</th>
+				<th>Hit</th>
+				<th>Count</th>
+			</tr>
+		
+	<?php
+	while ($row = mysql_fetch_object($result))
+	{
+		$to_be_replaced = array('<', '>');
+		$replace_with = array('&lgt;', '&gt');
+		
+		?><tr id="defaultcursor">
+			<td><?php echo str_replace($to_be_replaced, $replace_with, $row->term); ?></td>
+			<td><?php echo $row->hit; ?></td>
+			<td><?php echo $row->num; ?></td>
+		</tr><?php
+	}
+	?>
+	</table>
+	<?php
+}
+
+?>
